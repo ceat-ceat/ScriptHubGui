@@ -1,0 +1,400 @@
+--[[
+ceat_ceat
+ceat(mega stupid)jjjjjjjjj#6144
+
+old script panel here:
+- https://pastebin.com/BrRrbL5z
+
+i made this because the original script panel was pretty small
+you can go take a look yourself by running it and just look at how small it in
+in this version i basically made an interface thats not just all black and white and is more flexible
+it just allows me to add more features to it easier and it has a bit more customization
+
+]]
+
+local ts,plrs,ts2,uis = game:GetService("TweenService"),game:GetService("Players"),game:GetService("TextService"),game:GetService("UserInputService")
+
+function create(class,prop)
+	local inst = Instance.new(class)
+	if prop then
+		for i, v in next, prop do
+			inst[i] = v
+		end
+	end
+	return inst
+end
+function tween(inst,prop,dur,dir,eas)
+	ts:Create(inst,TweenInfo.new(dur,eas or Enum.EasingStyle.Quad,dir or Enum.EasingDirection.Out),prop):Play()
+end
+
+if _G.ScriptPanelv2 then return end
+
+
+
+-- setup
+
+
+
+local openkeybind,scripts,open = Enum.KeyCode.BackSlash,{},true
+
+local screengui = create("ScreenGui",{
+	Parent = game.Players.LocalPlayer.PlayerGui,
+	--Parent = game:GetService("CoreGui"),
+	Name = string.format("%s's Script Panel",plrs:GetNameFromUserIdAsync(145632006)),
+	IgnoreGuiInset = true,
+	ResetOnSpawn = false
+})
+local frame = create("Frame",{
+	Parent = screengui,
+	BackgroundTransparency = 1,
+	Position = UDim2.new(0, 20,0, 20),
+	Size = UDim2.new(0, 150,0, 25),
+	Name = "Start"
+})
+create("UIListLayout",{
+	Parent =  frame,
+	Padding = UDim.new(0, 20),
+	FillDirection = Enum.FillDirection.Horizontal
+})
+
+frame.ChildAdded:Connect(function(inst)
+	if inst:IsA("Frame") and not open then
+		tween(inst.TextLabel,{Position=UDim2.new(math.random(-5,5), 0,0, screengui.AbsoluteSize.Y)},math.random(40,70)/75,Enum.EasingDirection.In)
+	end
+end)
+
+uis.InputBegan:Connect(function(key,gp)
+	if gp then return end
+	if key.KeyCode == openkeybind then
+		open = not open
+		for i, v in next, scripts do
+			tween(v.Frame,{Position=(open and UDim2.new() or UDim2.new(math.random(-5,5), 0,0, screengui.AbsoluteSize.Y))},math.random(40,70)/75,not open and Enum.EasingDirection.In)
+		end
+	end
+end)
+
+screengui:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+	if not open then
+		for i, v in next, scripts do
+			tween(v.Frame,{Position=(open and UDim2.new() or UDim2.new(math.random(-5,5), 0,0, screengui.AbsoluteSize.Y))},math.random(40,70)/75,Enum.EasingDirection.InOut)
+		end
+	end
+end)
+
+
+-- itemtypes
+
+
+
+function createbasicframe(text)
+	local new = create("Frame",{
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1, 0,0, 30),
+		Name = text
+	})
+	create("TextLabel",{
+		Parent = new,
+		AnchorPoint = Vector2.new(0, 0.5),
+		Position = UDim2.new(0, 10,0.5, 0),
+		Size = UDim2.new(1, -10,1, 0),
+		Font = Enum.Font.Gotham,
+		BackgroundTransparency = 1,
+		Text = text,
+		TextColor3 = Color3.fromRGB(255, 255, 255),
+		TextSize = 14,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Name = "Label"
+	})
+	return new
+end
+
+local itemtypes = {
+	String = function(params)
+		local new,default = createbasicframe(params.Name),typeof(params.Default) == "string" and params.Default or ""
+		local property = {Value=default}
+		local textbox = create("TextBox",{
+			Parent = new,
+			BorderSizePixel = 0,
+			AnchorPoint = Vector2.new(1, 0.5),
+			BackgroundColor3 = Color3.fromRGB(55, 55, 55),
+			Position = UDim2.new(1, -5,0.5, 0),
+			Size = UDim2.new(0, 50,0, 21),
+			Font = Enum.Font.Gotham,
+			Text = "",
+			TextSize = 14,
+			PlaceholderColor3 = Color3.fromRGB(178, 178, 178),
+			TextColor3 = Color3.fromRGB(255, 255, 255),
+			PlaceholderText = default
+		})
+		local event = create("BindableEvent",{
+			Parent = new,
+			Name = "Event"
+		})
+		property.Changed = event.Event
+		textbox.FocusLost:Connect(function()
+			property.Value = (textbox.Text ~= "" and textbox.Text or default)
+			textbox.Text = property.Value
+			event:Fire(property.Value)
+		end)
+		return new,property
+	end,
+	Number = function(params)
+		local new,default = createbasicframe(params.Name),tonumber(params.Default) or 0
+		local property = {Value=default}
+		local textbox = create("TextBox",{
+			Parent = new,
+			BorderSizePixel = 0,
+			AnchorPoint = Vector2.new(1, 0.5),
+			BackgroundColor3 = Color3.fromRGB(55, 55, 55),
+			Position = UDim2.new(1, -5,0.5, 0),
+			Size = UDim2.new(0, 50,0, 21),
+			Font = Enum.Font.Gotham,
+			Text = "",
+			TextSize = 14,
+			PlaceholderColor3 = Color3.fromRGB(178, 178, 178),
+			TextColor3 = Color3.fromRGB(255, 255, 255),
+			PlaceholderText = default
+		})
+		local event = create("BindableEvent",{
+			Parent = new,
+			Name = "Event"
+		})
+		property.Changed = event.Event
+		textbox.FocusLost:Connect(function()
+			property.Value = tonumber(textbox.Text) or default
+			textbox.Text = property.Value
+			event:Fire(property.Value)
+		end)
+		return new,property
+	end,
+	Boolean = function(params,otherdata)
+		local new,default = createbasicframe(params.Name),((params.Default and typeof(params.Default) == "boolean") and params.Default or false)
+		local property = {Value=default}
+		local bar = create("Frame",{
+			Parent = new,
+			BorderSizePixel = 0,
+			AnchorPoint = Vector2.new(1, 0.5),
+			Position = UDim2.new(1, -5,0.5, 0),
+			Size = UDim2.new(0, 3,0, 21),
+			BackgroundColor3 = (property.Value and otherdata.Color or Color3.fromRGB(255, 255, 255))
+		})
+		local button = create("TextButton",{
+			Parent = new,
+			BackgroundTransparency = 1,
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.new(0.5, 0,0.5, 0),
+			Size = UDim2.new(1, -10,1, -10),
+			Text = "",
+			ZIndex = 2
+		})
+		local event = create("BindableEvent",{
+			Parent = new,
+			Name = "Event"
+		})
+		property.Changed = event.Event
+		new.Label.TextColor3 = (property.Value and otherdata.Color or Color3.fromRGB(255, 255, 255))
+		button.MouseButton1Click:Connect(function()
+			property.Value = not property.Value
+			local color = (property.Value and otherdata.Color or Color3.fromRGB(255, 255, 255))
+			tween(bar,{BackgroundColor3 = color},0.3)
+			tween(new.Label,{TextColor3 = color},0.3)
+			event:Fire(property.Value)
+		end)
+		return new,property
+	end,
+	Button = function(params)
+		local new,text = createbasicframe(params.Name),(params.Text and tostring(params.Text) or "")
+		local button = create("TextButton",{
+			Parent = new,
+			AnchorPoint = Vector2.new(1, 0.5),
+			BorderSizePixel = 0,
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			Position = UDim2.new(1, -5,0.5, 0),
+			Size = UDim2.new(0, math.max(ts2:GetTextSize(text,14,Enum.Font.Gotham,Vector2.new()).X+6,21),0, 21),
+			Font = Enum.Font.Gotham,
+			TextSize = 14,
+			Text = text,
+			TextColor3 = Color3.fromRGB(),
+		})
+		--button.Size = UDim2.new(0, math.max(button.TextBounds.X + 6,21),0, 21)
+		local event = create("BindableEvent",{
+			Parent = new,
+			Name = "Event"
+		})
+		button.MouseButton1Click:Connect(function()
+			event:Fire()
+		end)
+		return new,{Click = event.Event}
+	end,
+}
+
+
+
+-- functions
+
+
+
+-- item functions
+
+
+
+function additem(_frame,type,params,other)
+	local itemtype = itemtypes[type]
+	assert(itemtype,"Invalid item type")
+	assert(params.Name and tostring(params.Name),"Name is required")
+	local new,thing = itemtype(params,other)
+	new.Parent = _frame
+	return new,thing
+end
+
+local item = {}
+item.__index = item
+
+function item:Remove()
+	local list = self.Frame.Parent
+	self.Frame:Destroy()
+	list.Size = UDim2.new(1, 0,0, list.List.AbsoluteContentSize.Y)
+	self = nil
+end
+
+function item.new(...)
+	local new,thing = additem(...)
+	thing.Frame = new
+	return setmetatable(thing,item)
+end
+
+
+
+-- script category functions
+
+
+
+local category = {}
+category.__index = category
+
+function category:AddItem(itemtype,params)
+	local thing = item.new(self.Frame.List,itemtype,params,{Color=self.Color})
+	self.Frame.List.Size = UDim2.new(1, 0,0, self.Frame.List.List.AbsoluteContentSize.Y)
+	return thing
+end
+
+function category:Remove()
+	local list = self.Frame.Parent
+	self.Frame:Destroy()
+	list.Size = UDim2.new(1, 0,0, list.List.AbsoluteContentSize.Y)
+	self = nil
+end
+
+function category.new(name,list,color)
+	local label = create("TextLabel",{
+		Parent = list,
+		BackgroundColor3 = color,
+		BorderSizePixel = 0,
+		Size = UDim2.new(1, 0,0, 25),
+		Font = Enum.Font.Gotham,
+		Text = name,
+		TextColor3 = Color3.fromRGB(255, 255, 255),
+		TextSize = 14,
+		Name = string.format("c_%s",name)
+	})
+	local listframe = create("Frame",{
+		Parent = label,
+		BorderSizePixel = 0,
+		Size = UDim2.new(1, 0,0, 100),
+		BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+		Position = UDim2.new(0, 0,1, 0),
+		Name = "List"
+	})
+	create("UIListLayout",{
+		Parent = listframe,
+		Padding = UDim.new(0, 10),
+		Name = "List"
+	})
+	return setmetatable({Frame=label,Color=color},category)
+end
+
+
+-- script functions
+
+
+
+local newscript = {}
+newscript.__index = newscript
+
+function newscript:AddItem(itemtype,params)
+	local thing = item.new(self.Frame.InitialList.MainCategory,itemtype,params,{Color=self.Color})
+	self.Frame.InitialList.MainCategory.Size = UDim2.new(1, 0,0, self.Frame.InitialList.MainCategory.List.AbsoluteContentSize.Y)
+	return thing
+end
+
+function newscript:AddCategory(name)
+	assert(name and tostring(name),"Argument 1 invalid or nil")
+	return category.new(name,self.Frame.InitialList,self.Color)
+end
+
+function newscript:Remove()
+	self.Frame:Destroy()
+	self = nil
+end
+
+function newscript.new(name,color)
+	local new = create("Frame",{
+		Parent = frame,
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1, 0,1, 0),
+		Name = name
+	})
+	local label = create("TextLabel",{
+		Parent = new,
+		BackgroundColor3 = color,
+		BorderSizePixel = 0,
+		Size = UDim2.new(1, 0,1, 0),
+		Font = Enum.Font.Gotham,
+		Text = name,
+		TextColor3 = Color3.fromRGB(255, 255, 255),
+		TextSize = 14,
+	})
+	local firstlayerlist = create("Frame",{
+		Parent = label,
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0, 0,1, 0),
+		Size = UDim2.new(1, 0,0, 100),
+		Name = "InitialList"
+	})
+	create("UIListLayout",{
+		Parent = firstlayerlist,
+		Padding = UDim.new(0, 10),
+		Name = "List"
+	})
+	local category1 = create("Frame",{
+		Parent = firstlayerlist,
+		BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+		BorderSizePixel = 0,
+		Size = UDim2.new(1, 0,0, 0),
+		Name = "MainCategory"
+	})
+	create("UIListLayout",{
+		Parent = category1,
+		Name = "List"
+	})
+	return setmetatable({Frame=label,Color=color},newscript)
+end
+
+-- panel functions
+
+local panel = {}
+panel.__index = panel
+
+function panel:AddScript(name,color)
+	assert(name and typeof(tostring(name)) == "string","Argument 1 Invalid or nil")
+	color = color or Color3.fromRGB(255, 148, 106)
+	local thenewscript = newscript.new(name,color)
+	table.insert(scripts,thenewscript)
+	return thenewscript
+end
+
+-- assign functions to _G.ScriptPanelv2
+
+_G.ScriptPanelv2 = setmetatable({},panel)
+
+return "Script Panel v2 setup; you may now use _G.ScriptPanelv2:AddScript()"
