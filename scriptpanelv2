@@ -12,9 +12,15 @@ you can go take a look yourself by running it and just look at how small it in
 in this version i basically made an interface thats not just all black and white and is more flexible
 it just allows me to add more features to it easier and it has a bit more customization
 
+run
+
+	loadstring("https://raw.githubusercontent.com/ceat-ceat/stuff/main/scriptpanelv2")()
+	
+to get _G.ScriptPanelv2 up and working
+
 ]]
 
-local ts,plrs,ts2,uis = game:GetService("TweenService"),game:GetService("Players"),game:GetService("TextService"),game:GetService("UserInputService")
+local ts,plrs,ts2,uis,coregui = game:GetService("TweenService"),game:GetService("Players"),game:GetService("TextService"),game:GetService("UserInputService"),game:GetService("CoreGui")
 
 function create(class,prop)
 	local inst = Instance.new(class)
@@ -40,8 +46,8 @@ if _G.ScriptPanelv2 then return end
 local openkeybind,scripts,open = Enum.KeyCode.BackSlash,{},true
 
 local screengui = create("ScreenGui",{
-	Parent = game.Players.LocalPlayer.PlayerGui,
-	--Parent = game:GetService("CoreGui"),
+	--Parent = game.Players.LocalPlayer.PlayerGui, -- testing
+	Parent = game:GetService("CoreGui"), -- main
 	Name = string.format("%s's Script Panel",plrs:GetNameFromUserIdAsync(145632006)),
 	IgnoreGuiInset = true,
 	ResetOnSpawn = false
