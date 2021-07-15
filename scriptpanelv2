@@ -18,6 +18,12 @@ run
 	
 to get _G.ScriptPanelv2 up and working
 
+Changelog
+
+7/15/2021
+- created
+- added change keykind button
+
 ]]
 
 local ts,plrs,ts2,uis,coregui = game:GetService("TweenService"),game:GetService("Players"),game:GetService("TextService"),game:GetService("UserInputService"),game:GetService("CoreGui")
@@ -43,11 +49,11 @@ if _G.ScriptPanelv2 then return end
 
 
 
-local openkeybind,scripts,open = Enum.KeyCode.BackSlash,{},true
+local openkeybind,scripts,open,selectingkeybind = Enum.KeyCode.BackSlash,{},true,false
 
 local screengui = create("ScreenGui",{
 	--Parent = game.Players.LocalPlayer.PlayerGui, -- testing
-	Parent = game:GetService("CoreGui"), -- main
+	Parent = coregui, -- main
 	Name = string.format("%s's Script Panel",plrs:GetNameFromUserIdAsync(145632006)),
 	IgnoreGuiInset = true,
 	ResetOnSpawn = false
@@ -64,6 +70,35 @@ create("UIListLayout",{
 	Padding = UDim.new(0, 20),
 	FillDirection = Enum.FillDirection.Horizontal
 })
+local keybindbutton = create("TextButton",{
+	Parent = screengui,
+	BackgroundColor3 = Color3.fromRGB(255, 148, 106),
+	BorderSizePixel = 0,
+	AnchorPoint = Vector2.new(1, 1),
+	Position = UDim2.new(1, -20,1, -20),
+	Size = UDim2.new(0, 150,0, 25),
+	Font = Enum.Font.Gotham,
+	Text = "Current Keybind : [\\]",
+	TextColor3 = Color3.fromRGB(255, 255, 255),
+	TextSize = 14
+})
+
+function changekeybind(key)
+	openkeybind,keybindbutton.Text = key,string.format("Current Keybind: [%s]",key.Name)
+	keybindbutton.Size = UDim2.new(0, keybindbutton.TextBounds.X+10,0, 25)
+end
+
+keybindbutton.MouseButton1Click:Connect(function()
+	if selectingkeybind then return end
+	selectingkeybind,keybindbutton.Text,keybindbutton.Size = true,"Press a key",UDim2.new(0, 84,0, 25)
+	local key
+	repeat
+		key = uis.InputBegan:Wait()
+	until key.KeyCode ~= Enum.KeyCode.Unknown
+	changekeybind(key.KeyCode)
+	wait()
+	selectingkeybind = false
+end)
 
 frame.ChildAdded:Connect(function(inst)
 	if inst:IsA("Frame") and not open then
@@ -72,7 +107,7 @@ frame.ChildAdded:Connect(function(inst)
 end)
 
 uis.InputBegan:Connect(function(key,gp)
-	if gp then return end
+	if gp or selectingkeybind then return end
 	if key.KeyCode == openkeybind then
 		open = not open
 		for i, v in next, scripts do
@@ -89,6 +124,7 @@ screengui:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
 	end
 end)
 
+changekeybind(Enum.KeyCode.BackSlash)
 
 -- itemtypes
 
