@@ -20,6 +20,11 @@ to get _G.ScriptPanelv2 up and working
 
 Changelog
 
+7/16/2021
+- added "Keybind" itemtype
+	- returns an object with a Changed event
+		passes an Enum.KeyCode when value is changed
+
 7/15/2021
 - created
 - added change keykind button
@@ -267,6 +272,40 @@ local itemtypes = {
 			event:Fire()
 		end)
 		return new,{Click = event.Event}
+	end,
+	Keybind = function(params)
+		local new,default = createbasicframe(params.Name),typeof(params.Default) == "EnumItem" and params.Default or Enum.KeyCode.E
+		local property,changing = {Value=default},false
+		local button = create("TextButton",{
+			Parent = new,
+			BorderSizePixel = 0,
+			AnchorPoint = Vector2.new(1, 0.5),
+			BackgroundColor3 = Color3.fromRGB(55, 55, 55),
+			Position = UDim2.new(1, -5,0.5, 0),
+			Size = UDim2.new(0, 50,0, 21),
+			Font = Enum.Font.Gotham,
+			Text = default.Name,
+			TextSize = 14,
+			TextColor3 = Color3.fromRGB(255, 255, 255),
+		})
+		local event = create("BindableEvent",{
+			Parent = new,
+			Name = "Event"
+		})
+		property.Changed = event.Event
+		button.MouseButton1Click:Connect(function()
+			if changing then return end
+			changing,button.Text,button.Size = true,"Press a key",UDim2.new(0, 80,0, 21)
+			local key
+			repeat
+				key = uis.InputBegan:Wait()
+			until key.KeyCode ~= Enum.KeyCode.Unknown
+			button.Text,button.Size = key.KeyCode.Name,UDim2.new(0, math.max(ts2:GetTextSize(key.KeyCode.Name,14,Enum.Font.Gotham,Vector2.new()).X+6,50),0, 21)
+			property.Value = key.KeyCode
+			event:Fire(key.KeyCode)
+			changing = false
+		end)
+		return new,property
 	end,
 }
 
