@@ -56,7 +56,8 @@ local screengui = create("ScreenGui",{
 	Parent = coregui, -- main
 	Name = string.format("%s's Script Panel",plrs:GetNameFromUserIdAsync(145632006)),
 	IgnoreGuiInset = true,
-	ResetOnSpawn = false
+	ResetOnSpawn = false,
+	DisplayOrder = 3
 })
 local frame = create("Frame",{
 	Parent = screengui,
