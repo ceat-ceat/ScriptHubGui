@@ -26,7 +26,7 @@ Changelog
 
 ]]
 
-local ts,plrs,ts2,uis,coregui = game:GetService("TweenService"),game:GetService("Players"),game:GetService("TextService"),game:GetService("UserInputService"),game:GetService("CoreGui")
+local ts,plrs,ts2,uis,coregui,run = game:GetService("TweenService"),game:GetService("Players"),game:GetService("TextService"),game:GetService("UserInputService"),game:GetService("CoreGui"),game:GetService("RunService")
 
 function create(class,prop)
 	local inst = Instance.new(class)
@@ -52,8 +52,7 @@ if _G.ScriptPanelv2 then return end
 local openkeybind,scripts,open,selectingkeybind = Enum.KeyCode.BackSlash,{},true,false
 
 local screengui = create("ScreenGui",{
-	--Parent = game.Players.LocalPlayer.PlayerGui, -- testing
-	Parent = coregui, -- main
+	Parent = run:IsStudio() and plrs.LocalPlayer:FindFirstChildOfClass("PlayerGui") or coregui,
 	Name = string.format("%s's Script Panel",plrs:GetNameFromUserIdAsync(145632006)),
 	ResetOnSpawn = false
 })
@@ -376,7 +375,7 @@ function newscript:AddCategory(name)
 end
 
 function newscript:Remove()
-	self.Container.Parent:Destroy()
+	self.Container:Destroy()
 	self = nil
 end
 
