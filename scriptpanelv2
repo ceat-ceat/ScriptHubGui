@@ -345,7 +345,7 @@ function additem(_frame,type,params,other)
 	assert(itemtype,"Invalid item type")
 	assert(params.Name and tostring(params.Name),"Name is required")
 	local new,thing = itemtype(params,other)
-	new.Parent = _frame
+	new.Parent,thing.ParentType = _frame,other.ParentType
 	return new,thing
 end
 
@@ -353,9 +353,12 @@ local item = {}
 item.__index = item
 
 function item:Remove()
-	local list = self.Frame.Parent
+	local list,categorycontainer = self.Frame.Parent,self.ParentType == "Category" and self.Frame.Parent.Parent.Parent
 	self.Frame:Destroy()
 	list.Size = UDim2.new(1, 0,0, list.List.AbsoluteContentSize.Y)
+	if categorycontainer then
+		categorycontainer.Size = UDim2.new(1, 0,0, 25+list.List.AbsoluteContentSize.Y)
+	end
 	self = nil
 end
 
@@ -375,14 +378,14 @@ local category = {}
 category.__index = category
 
 function category:AddItem(itemtype,params)
-	local thing = item.new(self.Frame.List,itemtype,params,{Color=self.Color})
-	self.Frame.List.Size = UDim2.new(1, 0,0, self.Frame.List.List.AbsoluteContentSize.Y)
-	self.Container.Size = UDim2.new(1, 0,0, 25+self.Frame.List.Size.Y.Offset)
+	local thing = item.new(self.Frame.Frame.List,itemtype,params,{Color=self.Color,ParentType="Category"})
+	self.Frame.Frame.List.Size = UDim2.new(1, 0,0, self.Frame.Frame.List.List.AbsoluteContentSize.Y)
+	self.Frame.Size = UDim2.new(1, 0,0, 25+self.Frame.Frame.List.Size.Y.Offset)
 	return thing
 end
 
 function category:Remove()
-	local list = self.Container.Parent.Parent
+	local list = self.Frame.Parent
 	self.Frame:Destroy()
 	list.Size = UDim2.new(1, 0,0, list.List.AbsoluteContentSize.Y)
 	self = nil
@@ -404,7 +407,7 @@ function category.new(name,list,color)
 		Text = name,
 		TextColor3 = Color3.fromRGB(255, 255, 255),
 		TextSize = 14,
-		Name = string.format("c_%s",name)
+		Name = "Frame"
 	})
 	local listframe = create("Frame",{
 		Parent = label,
@@ -419,7 +422,7 @@ function category.new(name,list,color)
 		Padding = UDim.new(0, 10),
 		Name = "List"
 	})
-	return setmetatable({Container=container,Frame=label,Color=color},category)
+	return setmetatable({Frame=container,Color=color},category)
 end
 
 
@@ -431,7 +434,7 @@ local newscript = {}
 newscript.__index = newscript
 
 function newscript:AddItem(itemtype,params)
-	local thing = item.new(self.Frame.InitialList.MainCategory,itemtype,params,{Color=self.Color})
+	local thing = item.new(self.Frame.InitialList.MainCategory,itemtype,params,{Color=self.Color,ParentType="Script"})
 	self.Frame.InitialList.MainCategory.Size = UDim2.new(1, 0,0, self.Frame.InitialList.MainCategory.List.AbsoluteContentSize.Y)
 	return thing
 end
