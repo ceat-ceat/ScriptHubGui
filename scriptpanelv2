@@ -54,7 +54,7 @@ if _G.ScriptPanelv2 then return end
 
 
 
-local openkeybind,scripts,open,selectingkeybind = Enum.KeyCode.BackSlash,{},true,false
+local openkeybind,scripts,open,selectingkeybind,scrollpos = Enum.KeyCode.BackSlash,{},true,false,0
 
 local screengui = create("ScreenGui",{
 	Parent = run:IsStudio() and plrs.LocalPlayer:FindFirstChildOfClass("PlayerGui") or coregui,
@@ -66,13 +66,28 @@ local frame = create("Frame",{
 	BackgroundTransparency = 1,
 	Position = UDim2.new(0, 20,0, 20),
 	Size = UDim2.new(0, 150,0, 25),
-	Name = "Start"
+	Name = "Start",
+	ZIndex = 2,
 })
-create("UIListLayout",{
+local mainlist = create("UIListLayout",{
 	Parent =  frame,
 	Padding = UDim.new(0, 20),
 	FillDirection = Enum.FillDirection.Horizontal
 })
+
+local screencover = create("ScrollingFrame",{
+	Parent = screengui,
+	AnchorPoint = Vector2.new(0.5, 0.5),
+	BackgroundTransparency = 1,
+	BorderSizePixel = 0,
+	Position = UDim2.new(0.5, 0,0.5, 0),
+	Size = UDim2.new(1, -40,1, -40),
+	CanvasSize = UDim2.new(),
+	ScrollBarThickness = 0,
+	ScrollingDirection = Enum.ScrollingDirection.X,
+	Name = "ScreenCover",
+})
+
 local keybindbutton = create("TextButton",{
 	Parent = screengui,
 	BackgroundColor3 = Color3.fromRGB(255, 148, 106),
@@ -116,6 +131,7 @@ uis.InputBegan:Connect(function(key,gp)
 		for i, v in next, scripts do
 			tween(v.Frame,{Position=(open and UDim2.new() or UDim2.new(math.random(-5,5), 0,0, screengui.AbsoluteSize.Y))},math.random(40,70)/75,not open and Enum.EasingDirection.In)
 		end
+		screencover.Visible = open
 	end
 end)
 
@@ -125,6 +141,12 @@ screengui:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
 			tween(v.Frame,{Position=(open and UDim2.new() or UDim2.new(math.random(-5,5), 0,0, screengui.AbsoluteSize.Y))},math.random(40,70)/75,Enum.EasingDirection.InOut)
 		end
 	end
+end)
+
+run.RenderStepped:Connect(function(delta)
+	--print(UDim2.new(0, 20-screencover.CanvasPosition.X,0, 20))
+	frame.Position = UDim2.new(0, frame.Position.X.Offset+(20-screencover.CanvasPosition.X-frame.Position.X.Offset)*delta*50,0, 20)
+	--tween(frame,{Position=UDim2.new(0, 20-screencover.CanvasPosition.X,0, 20)},20*delta)
 end)
 
 changekeybind(Enum.KeyCode.BackSlash)
@@ -429,7 +451,7 @@ function newscript.new(name,color)
 		Parent = new,
 		BackgroundColor3 = color,
 		BorderSizePixel = 0,
-		Size = UDim2.new(1, 0,1, 0),
+		Size = UDim2.new(0, 150,1, 0),
 		Font = Enum.Font.Gotham,
 		Text = name,
 		TextColor3 = Color3.fromRGB(255, 255, 255),
@@ -471,6 +493,7 @@ function panel:AddScript(name,color)
 	color = color or Color3.fromRGB(255, 148, 106)
 	local thenewscript = newscript.new(name,color)
 	table.insert(scripts,thenewscript)
+	screencover.CanvasSize = UDim2.new(0, mainlist.AbsoluteContentSize.X,0, 0)
 	return thenewscript
 end
 
