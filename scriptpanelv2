@@ -376,7 +376,7 @@ function newscript:AddCategory(name)
 end
 
 function newscript:Remove()
-	self.Frame.Parent:Destroy()
+	self.Container.Parent:Destroy()
 	self = nil
 end
 
@@ -420,7 +420,7 @@ function newscript.new(name,color)
 		Parent = category1,
 		Name = "List"
 	})
-	return setmetatable({Frame=label,Color=color},newscript)
+	return setmetatable({Container=new,Frame=label,Color=color},newscript)
 end
 
 -- panel functions
