@@ -145,9 +145,7 @@ screengui:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
 end)
 
 run.RenderStepped:Connect(function(delta)
-	--print(UDim2.new(0, 20-screencover.CanvasPosition.X,0, 20))
 	frame.Position = UDim2.new(0, frame.Position.X.Offset+(20-screencover.CanvasPosition.X-frame.Position.X.Offset)*delta*50,0, 20)
-	--tween(frame,{Position=UDim2.new(0, 20-screencover.CanvasPosition.X,0, 20)},20*delta)
 end)
 
 changekeybind(Enum.KeyCode.BackSlash)
@@ -379,19 +377,26 @@ category.__index = category
 function category:AddItem(itemtype,params)
 	local thing = item.new(self.Frame.List,itemtype,params,{Color=self.Color})
 	self.Frame.List.Size = UDim2.new(1, 0,0, self.Frame.List.List.AbsoluteContentSize.Y)
+	self.Container.Size = UDim2.new(1, 0,0, 25+self.Frame.List.Size.Y.Offset)
 	return thing
 end
 
 function category:Remove()
-	local list = self.Frame.Parent
+	local list = self.Container.Parent.Parent
 	self.Frame:Destroy()
 	list.Size = UDim2.new(1, 0,0, list.List.AbsoluteContentSize.Y)
 	self = nil
 end
 
 function category.new(name,list,color)
-	local label = create("TextLabel",{
+	local container = create("Frame",{
 		Parent = list,
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1, 0,0, 25),
+		Name = string.format("c_%s",name)
+	})
+	local label = create("TextLabel",{
+		Parent = container,
 		BackgroundColor3 = color,
 		BorderSizePixel = 0,
 		Size = UDim2.new(1, 0,0, 25),
@@ -414,7 +419,7 @@ function category.new(name,list,color)
 		Padding = UDim.new(0, 10),
 		Name = "List"
 	})
-	return setmetatable({Frame=label,Color=color},category)
+	return setmetatable({Container=container,Frame=label,Color=color},category)
 end
 
 
