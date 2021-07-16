@@ -376,7 +376,7 @@ function newscript:AddCategory(name)
 end
 
 function newscript:Remove()
-	self.Frame:Destroy()
+	self.Frame.Parent:Destroy()
 	self = nil
 end
 
