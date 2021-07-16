@@ -55,9 +55,7 @@ local screengui = create("ScreenGui",{
 	--Parent = game.Players.LocalPlayer.PlayerGui, -- testing
 	Parent = coregui, -- main
 	Name = string.format("%s's Script Panel",plrs:GetNameFromUserIdAsync(145632006)),
-	IgnoreGuiInset = true,
-	ResetOnSpawn = false,
-	DisplayOrder = 3
+	ResetOnSpawn = false
 })
 local frame = create("Frame",{
 	Parent = screengui,
