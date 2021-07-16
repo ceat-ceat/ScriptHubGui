@@ -24,6 +24,7 @@ Changelog
 - added "Keybind" itemtype
 	- returns an object with a Changed event
 		passes an Enum.KeyCode when value is changed
+- added scrolling
 
 7/15/2021
 - created
