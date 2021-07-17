@@ -27,8 +27,10 @@ Changelog
 - added Category:GetItem()
 - switched from BindableEvents to _G.FakeBindable
 
-- added new optional parameter to AddScript()
-which takes an a SortOrder Enum
+- added two new optional parmeters to AddScript()
+itemsort - determines how the interface should order its items
+categorysort - determines how the interface should order its categories
+
 - added two new optional parmeters to Script:AddCategory()
 	sort
 	- same as AddScript() addition
@@ -472,7 +474,7 @@ function newscript:Remove()
 	self = nil
 end
 
-function newscript.new(name,color,sort)
+function newscript.new(name,color,itemsort,categorysort)
 	local new = create("Frame",{
 		Parent = frame,
 		BackgroundTransparency = 1,
@@ -499,6 +501,7 @@ function newscript.new(name,color,sort)
 	create("UIListLayout",{
 		Parent = firstlayerlist,
 		Padding = UDim.new(0, 10),
+		SortOrder = (categorysort == Enum.SortOrder.LayoutOrder or categorysort == Enum.SortOrder.Name) and categorysort or Enum.SortOrder.Name,
 		Name = "List"
 	})
 	local category1 = create("Frame",{
@@ -510,7 +513,7 @@ function newscript.new(name,color,sort)
 	})
 	create("UIListLayout",{
 		Parent = category1,
-		SortOrder = (sort == Enum.SortOrder.LayoutOrder or sort == Enum.SortOrder.Name) and sort or Enum.SortOrder.Name,
+		SortOrder = (itemsort == Enum.SortOrder.LayoutOrder or itemsort == Enum.SortOrder.Name) and itemsort or Enum.SortOrder.Name,
 		Name = "List"
 	})
 	return setmetatable({Container=new,Frame=label,Color=color,Categories={},Items={}},newscript)
@@ -521,11 +524,11 @@ end
 local panel = {}
 panel.__index = panel
 
-function panel:AddScript(name,color,sort)
+function panel:AddScript(name,color,itemsort,categorysort)
 	assert(name and typeof(tostring(name)) == "string","Argument 1 Invalid or nil")
 	assert(scripts[name] == nil,string.format("Script name '%s' is taken",name))
 	color = color or Color3.fromRGB(255, 148, 106)
-	local thenewscript = newscript.new(name,color,sort)
+	local thenewscript = newscript.new(name,color,itemsort,categorysort)
 	scripts[name] = thenewscript
 	screencover.CanvasSize = UDim2.new(0, mainlist.AbsoluteContentSize.X,0, 0)
 	return thenewscript
