@@ -141,18 +141,18 @@ keybindbutton.MouseButton1Click:Connect(function()
 	selectingkeybind = false
 end)
 
-frame.ChildAdded:Connect(function(inst)
+--[[frame.ChildAdded:Connect(function(inst)
 	if inst:IsA("Frame") and not open then
 		tween(inst.TextLabel,{Position=UDim2.new(math.random(-5,5), 0,0, screengui.AbsoluteSize.Y)},math.random(40,70)/75,Enum.EasingDirection.In)
 	end
-end)
+end)]]
 
 uis.InputBegan:Connect(function(key,gp)
 	if gp or selectingkeybind then return end
 	if key.KeyCode == openkeybind then
 		open = not open
 		for i, v in next, scripts do
-			tween(v.Frame,{Position=(open and UDim2.new() or UDim2.new(math.random(-5,5), 0,0, screengui.AbsoluteSize.Y))},math.random(40,70)/75,not open and Enum.EasingDirection.In)
+			tween(v.Frame,{Position=(open and UDim2.new() or UDim2.new(math.random(-500,500)/100, 0,0, screengui.AbsoluteSize.Y))},math.random(40,70)/75,not open and Enum.EasingDirection.In)
 		end
 		screencover.Visible = open
 	end
@@ -485,6 +485,7 @@ function newscript.new(name,color,itemsort,categorysort)
 		Parent = new,
 		BackgroundColor3 = color,
 		BorderSizePixel = 0,
+		Position = UDim2.new(math.random(-500,500)/100, 0,0, screengui.AbsoluteSize.Y),
 		Size = UDim2.new(0, 150,1, 0),
 		Font = Enum.Font.Gotham,
 		Text = name,
@@ -516,6 +517,9 @@ function newscript.new(name,color,itemsort,categorysort)
 		SortOrder = (itemsort == Enum.SortOrder.LayoutOrder or itemsort == Enum.SortOrder.Name) and itemsort or Enum.SortOrder.Name,
 		Name = "List"
 	})
+	if open then
+		tween(label,{Position= UDim2.new()},math.random(40,70)/75,not open and Enum.EasingDirection.In)
+	end
 	return setmetatable({Container=new,Frame=label,Color=color,Categories={},Items={}},newscript)
 end
 
