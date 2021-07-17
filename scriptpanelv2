@@ -20,6 +20,13 @@ to get _G.ScriptPanelv2 up and working
 
 Changelog
 
+7/17/2021
+- added _G.ScriptPanelv:GetScript()
+- added Script:GetCategory()
+- added Script:GetItem()
+- added Category:GetItem()
+- switched from BindableEvents to _G.FakeBindable
+
 7/16/2021
 - added "Keybind" itemtype
 	- returns an object with a Changed event
@@ -32,6 +39,8 @@ Changelog
 
 ]]
 
+loadstring(game:HttpGet("https://raw.githubusercontent.com/ceat-ceat/stuff/main/fake%20bindable"))()
+--require(script:WaitForChild("fakevent"))
 local ts,plrs,ts2,uis,coregui,run = game:GetService("TweenService"),game:GetService("Players"),game:GetService("TextService"),game:GetService("UserInputService"),game:GetService("CoreGui"),game:GetService("RunService")
 
 function create(class,prop)
@@ -194,10 +203,7 @@ local itemtypes = {
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 			PlaceholderText = default
 		})
-		local event = create("BindableEvent",{
-			Parent = new,
-			Name = "Event"
-		})
+		local event = _G.FakeBindable.new()
 		property.Changed = event.Event
 		textbox.FocusLost:Connect(function()
 			property.Value = (textbox.Text ~= "" and textbox.Text or default)
@@ -223,10 +229,7 @@ local itemtypes = {
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 			PlaceholderText = default
 		})
-		local event = create("BindableEvent",{
-			Parent = new,
-			Name = "Event"
-		})
+		local event = _G.FakeBindable.new()
 		property.Changed = event.Event
 		textbox.FocusLost:Connect(function()
 			property.Value = tonumber(textbox.Text) or default
@@ -255,10 +258,7 @@ local itemtypes = {
 			Text = "",
 			ZIndex = 2
 		})
-		local event = create("BindableEvent",{
-			Parent = new,
-			Name = "Event"
-		})
+		local event = _G.FakeBindable.new()
 		property.Changed = event.Event
 		new.Label.TextColor3 = (property.Value and otherdata.Color or Color3.fromRGB(255, 255, 255))
 		button.MouseButton1Click:Connect(function()
@@ -284,11 +284,7 @@ local itemtypes = {
 			Text = text,
 			TextColor3 = Color3.fromRGB(),
 		})
-		--button.Size = UDim2.new(0, math.max(button.TextBounds.X + 6,21),0, 21)
-		local event = create("BindableEvent",{
-			Parent = new,
-			Name = "Event"
-		})
+		local event = _G.FakeBindable.new()
 		button.MouseButton1Click:Connect(function()
 			event:Fire()
 		end)
@@ -309,10 +305,11 @@ local itemtypes = {
 			TextSize = 14,
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 		})
-		local event = create("BindableEvent",{
+		--[[local event = create("BindableEvent",{
 			Parent = new,
 			Name = "Event"
-		})
+		})]]
+		local event = _G.FakeBindable.new()
 		property.Changed = event.Event
 		button.MouseButton1Click:Connect(function()
 			if changing then return end
@@ -378,10 +375,18 @@ local category = {}
 category.__index = category
 
 function category:AddItem(itemtype,params)
-	local thing = item.new(self.Frame.Frame.List,itemtype,params,{Color=self.Color,ParentType="Category"})
+	assert(itemtype and tostring(itemtype),"Argument 1 invalid or nil")
+	assert(self.Items[params.Name] == nil,string.format("Item name '%s' is taken",params.Name))
+	local newitem = item.new(self.Frame.Frame.List,itemtype,params,{Color=self.Color,ParentType="Category"})
 	self.Frame.Frame.List.Size = UDim2.new(1, 0,0, self.Frame.Frame.List.List.AbsoluteContentSize.Y)
 	self.Frame.Size = UDim2.new(1, 0,0, 25+self.Frame.Frame.List.Size.Y.Offset)
-	return thing
+	self.Items[params.Name] = newitem
+	return newitem
+end
+
+function category:GetItem(name)
+	assert(name and tostring(name),"Argument 1 invalid or nil")
+	return self.Items[name]
 end
 
 function category:Remove()
@@ -421,7 +426,7 @@ function category.new(name,list,color)
 		Parent = listframe,
 		Name = "List"
 	})
-	return setmetatable({Frame=container,Color=color},category)
+	return setmetatable({Frame=container,Color=color,Items={}},category)
 end
 
 
@@ -433,14 +438,24 @@ local newscript = {}
 newscript.__index = newscript
 
 function newscript:AddItem(itemtype,params)
-	local thing = item.new(self.Frame.InitialList.MainCategory,itemtype,params,{Color=self.Color,ParentType="Script"})
+	assert(itemtype and tostring(itemtype),"Argument 1 invalid or nil")
+	assert(self.Items[params.Name] == nil,string.format("Item name '%s' is taken",params.Name))
+	local newitem = item.new(self.Frame.InitialList.MainCategory,itemtype,params,{Color=self.Color,ParentType="Script"})
 	self.Frame.InitialList.MainCategory.Size = UDim2.new(1, 0,0, self.Frame.InitialList.MainCategory.List.AbsoluteContentSize.Y)
-	return thing
+	self.Items[params.Name] = newitem
+	return newitem
 end
 
 function newscript:AddCategory(name)
+	assert(self.Categories[name] == nil,string.format("Category name '%s' is taken",name))
+	local newcategory = category.new(name,self.Frame.InitialList,self.Color)
+	self.Categories[name] = newcategory
+	return newcategory
+end
+
+function newscript:GetCategory(name)
 	assert(name and tostring(name),"Argument 1 invalid or nil")
-	return category.new(name,self.Frame.InitialList,self.Color)
+	return self.Categories[name]
 end
 
 function newscript:Remove()
@@ -488,7 +503,7 @@ function newscript.new(name,color)
 		Parent = category1,
 		Name = "List"
 	})
-	return setmetatable({Container=new,Frame=label,Color=color},newscript)
+	return setmetatable({Container=new,Frame=label,Color=color,Categories={},Items={}},newscript)
 end
 
 -- panel functions
@@ -498,11 +513,17 @@ panel.__index = panel
 
 function panel:AddScript(name,color)
 	assert(name and typeof(tostring(name)) == "string","Argument 1 Invalid or nil")
+	assert(scripts[name] == nil,string.format("Script name '%s' is taken",name))
 	color = color or Color3.fromRGB(255, 148, 106)
 	local thenewscript = newscript.new(name,color)
-	table.insert(scripts,thenewscript)
+	scripts[name] = thenewscript
 	screencover.CanvasSize = UDim2.new(0, mainlist.AbsoluteContentSize.X,0, 0)
 	return thenewscript
+end
+
+function panel:GetScript(name)
+	assert(name and tostring(name),"Argument 1 invalid or nil")
+	return scripts[name]
 end
 
 -- assign functions to _G.ScriptPanelv2
