@@ -419,7 +419,6 @@ function category.new(name,list,color)
 	})
 	create("UIListLayout",{
 		Parent = listframe,
-		Padding = UDim.new(0, 10),
 		Name = "List"
 	})
 	return setmetatable({Frame=container,Color=color},category)
