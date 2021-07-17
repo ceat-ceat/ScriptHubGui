@@ -27,6 +27,17 @@ Changelog
 - added Category:GetItem()
 - switched from BindableEvents to _G.FakeBindable
 
+- added new optional parameter to AddScript()
+which takes an a SortOrder Enum
+- added two new optional parmeters to Script:AddCategory()
+	sort
+	- same as AddScript() addition
+	layoutorder
+	- order for the category to be displayed with other categories, active when script sortorder is Enum.SortOrder.LayoutOrder
+- added new optional config table value to AddItem()
+LayoutOrder - order for the item to be displayed with other items, active when category sortorder is Enum.SortOrder.LayoutOrder
+
+
 7/16/2021
 - added "Keybind" itemtype
 	- returns an object with a Changed event
@@ -305,10 +316,6 @@ local itemtypes = {
 			TextSize = 14,
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 		})
-		--[[local event = create("BindableEvent",{
-			Parent = new,
-			Name = "Event"
-		})]]
 		local event = _G.FakeBindable.new()
 		property.Changed = event.Event
 		button.MouseButton1Click:Connect(function()
@@ -342,7 +349,7 @@ function additem(_frame,type,params,other)
 	assert(itemtype,"Invalid item type")
 	assert(params.Name and tostring(params.Name),"Name is required")
 	local new,thing = itemtype(params,other)
-	new.Parent,thing.ParentType = _frame,other.ParentType
+	new.Parent,new.LayoutOrder,thing.ParentType = _frame,params.LayoutOrder or 0,other.ParentType
 	return new,thing
 end
 
@@ -396,12 +403,13 @@ function category:Remove()
 	self = nil
 end
 
-function category.new(name,list,color)
+function category.new(name,list,color,sort,layoutorder)
 	local container = create("Frame",{
 		Parent = list,
 		BackgroundTransparency = 1,
 		Size = UDim2.new(1, 0,0, 25),
-		Name = string.format("c_%s",name)
+		Name = string.format("c_%s",name),
+		LayoutOrder = layoutorder or 0
 	})
 	local label = create("TextLabel",{
 		Parent = container,
@@ -424,6 +432,7 @@ function category.new(name,list,color)
 	})
 	create("UIListLayout",{
 		Parent = listframe,
+		SortOrder = (sort == Enum.SortOrder.LayoutOrder or sort == Enum.SortOrder.Name) and sort or Enum.SortOrder.Name,
 		Name = "List"
 	})
 	return setmetatable({Frame=container,Color=color,Items={}},category)
@@ -446,9 +455,9 @@ function newscript:AddItem(itemtype,params)
 	return newitem
 end
 
-function newscript:AddCategory(name)
+function newscript:AddCategory(name,sort,layoutorder)
 	assert(self.Categories[name] == nil,string.format("Category name '%s' is taken",name))
-	local newcategory = category.new(name,self.Frame.InitialList,self.Color)
+	local newcategory = category.new(name,self.Frame.InitialList,self.Color,sort,layoutorder)
 	self.Categories[name] = newcategory
 	return newcategory
 end
@@ -463,7 +472,7 @@ function newscript:Remove()
 	self = nil
 end
 
-function newscript.new(name,color)
+function newscript.new(name,color,sort)
 	local new = create("Frame",{
 		Parent = frame,
 		BackgroundTransparency = 1,
@@ -501,6 +510,7 @@ function newscript.new(name,color)
 	})
 	create("UIListLayout",{
 		Parent = category1,
+		SortOrder = (sort == Enum.SortOrder.LayoutOrder or sort == Enum.SortOrder.Name) and sort or Enum.SortOrder.Name,
 		Name = "List"
 	})
 	return setmetatable({Container=new,Frame=label,Color=color,Categories={},Items={}},newscript)
@@ -511,11 +521,11 @@ end
 local panel = {}
 panel.__index = panel
 
-function panel:AddScript(name,color)
+function panel:AddScript(name,color,sort)
 	assert(name and typeof(tostring(name)) == "string","Argument 1 Invalid or nil")
 	assert(scripts[name] == nil,string.format("Script name '%s' is taken",name))
 	color = color or Color3.fromRGB(255, 148, 106)
-	local thenewscript = newscript.new(name,color)
+	local thenewscript = newscript.new(name,color,sort)
 	scripts[name] = thenewscript
 	screencover.CanvasSize = UDim2.new(0, mainlist.AbsoluteContentSize.X,0, 0)
 	return thenewscript
