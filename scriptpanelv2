@@ -1,4 +1,6 @@
 --[[
+-- i wanted to add a property thing that will fire a changed event when you change it via script by using __newindex in metatables but its doing weird shit so i cant :sanaecry:
+
 ceat_ceat
 ceat(mega stupid)jjjjjjjjj#6144
 
