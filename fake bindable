@@ -1,4 +1,5 @@
 if _G.FakeBindable then return end
+-- i know this is bad an absolutely not optimal but im stupid pls dont laugh at me paslpdpsldpasslsldspslplp
 
 
 -- fake connection
