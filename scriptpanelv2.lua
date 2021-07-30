@@ -16,7 +16,7 @@ it just allows me to add more features to it easier and it has a bit more custom
 
 run
 
-	loadstring("https://raw.githubusercontent.com/ceat-ceat/stuff/main/scriptpanelv2")()
+	loadstring("https://raw.githubusercontent.com/ceat-ceat/stuff/main/scriptpanelv2.lua")()
 	
 to get _G.ScriptPanelv2 up and working
 
@@ -54,7 +54,7 @@ LayoutOrder - order for the item to be displayed with other items, active when c
 
 ]]
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/ceat-ceat/stuff/main/fake%20bindable"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/ceat-ceat/ScriptPanelv2/main/fake%20bindable.lua"))()
 --require(script:WaitForChild("fakevent"))
 local ts,plrs,ts2,uis,coregui,run = game:GetService("TweenService"),game:GetService("Players"),game:GetService("TextService"),game:GetService("UserInputService"),game:GetService("CoreGui"),game:GetService("RunService")
 
