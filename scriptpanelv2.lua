@@ -22,35 +22,9 @@ to get _G.ScriptPanelv2 up and working
 
 Changelog
 
-7/17/2021
-- added _G.ScriptPanelv:GetScript()
-- added Script:GetCategory()
-- added Script:GetItem()
-- added Category:GetItem()
-- switched from BindableEvents to _G.FakeBindable
+changelog has moved, please go here instead
 
-- added two new optional parmeters to AddScript()
-itemsort - determines how the interface should order its items
-categorysort - determines how the interface should order its categories
-
-- added two new optional parmeters to Script:AddCategory()
-	sort
-	- same as AddScript() addition
-	layoutorder
-	- order for the category to be displayed with other categories, active when script sortorder is Enum.SortOrder.LayoutOrder
-- added new optional config table value to AddItem()
-LayoutOrder - order for the item to be displayed with other items, active when category sortorder is Enum.SortOrder.LayoutOrder
-
-
-7/16/2021
-- added "Keybind" itemtype
-	- returns an object with a Changed event
-		passes an Enum.KeyCode when value is changed
-- added scrolling
-
-7/15/2021
-- created
-- added change keykind button
+	https://github.com/ceat-ceat/ScriptPanelv2/blob/main/Changelog.txt
 
 ]]
 
