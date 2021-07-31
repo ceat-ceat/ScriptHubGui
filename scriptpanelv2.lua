@@ -1,5 +1,4 @@
 --[[
--- i wanted to add a property thing that will fire a changed event when you change it via script by using __newindex in metatables but its doing weird shit so i cant :sanaecry:
 
 ceat_ceat
 ceat(mega stupid)jjjjjjjjj#6144
@@ -28,8 +27,8 @@ changelog has moved, please go here instead
 
 ]]
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/ceat-ceat/ScriptPanelv2/main/fake%20bindable.lua"))()
---require(script:WaitForChild("fakevent"))
+--loadstring(game:HttpGet("https://raw.githubusercontent.com/ceat-ceat/stuff/main/fake%20bindable.lua"))()
+require(script:WaitForChild("fakebindable"))
 local ts,plrs,ts2,uis,coregui,run = game:GetService("TweenService"),game:GetService("Players"),game:GetService("TextService"),game:GetService("UserInputService"),game:GetService("CoreGui"),game:GetService("RunService")
 
 function create(class,prop)
@@ -45,7 +44,7 @@ function tween(inst,prop,dur,dir,eas)
 	ts:Create(inst,TweenInfo.new(dur,eas or Enum.EasingStyle.Quad,dir or Enum.EasingDirection.Out),prop):Play()
 end
 
-if _G.ScriptPanelv2 then return end
+if _G.ScriptPanelv2 then return "Script Panel v2 is already setup; use _G.ScriptPanelv2:AddScript()" end
 
 
 
@@ -310,6 +309,75 @@ local itemtypes = {
 		end)
 		return new,property
 	end,
+	Dropdown = function(params)
+		assert(typeof(params.Values) == "table","Values array invalid or nil")
+		local new,default = createbasicframe(params.Name),params.Values[params.Default]
+		local property,open = {Value=default},false
+		local button = create("TextButton",{
+			Parent = new,
+			AnchorPoint = Vector2.new(1, 0.5),
+			BackgroundColor3 = Color3.fromRGB(55, 55, 55),
+			BorderSizePixel = 0,
+			Position = UDim2.new(1, -5,0.5, 0),
+			Size = UDim2.new(0, 57,0, 21),
+			Text = ""
+		})
+		local label,arrow,container = create("TextLabel",{
+			Parent = button,
+			BackgroundTransparency = 1,
+			Position = UDim2.new(0, 7,0, 0),
+			Size = UDim2.new(0, 43,1, 0),
+			Font = Enum.Font.Gotham,
+			Text = default and params.Default or "",
+			TextColor3 = Color3.fromRGB(255, 255, 255),
+			TextXAlignment = Enum.TextXAlignment.Left,
+			TextSize = 14
+		}),create("ImageLabel",{
+			Parent = button,
+			BackgroundTransparency = 1,
+			AnchorPoint = Vector2.new(1, 0),
+			Position = UDim2.new(1, 0,0, 0),
+			Size = UDim2.new(0, 14,1, 0),
+			Image = "rbxassetid://4430382116",
+			ScaleType = Enum.ScaleType.Fit
+		}),create("Frame",{
+			Parent = button,
+			Name = 'shuksdhfusdf',
+			BackgroundTransparency = 1,
+			Position = UDim2.new(0, 0,1, 0),
+			Size = UDim2.new(1, 0,0, 0),
+			ClipsDescendants = true
+		})
+		local list = create("UIListLayout",{Parent=container})
+		local function openclose()
+			tween(container,{Size=UDim2.new(1, 0,0, open and list.AbsoluteContentSize.Y or 0)},0.3)
+			tween(arrow,{Rotation=open and 180 or 0},0.3)
+		end
+		local event = _G.FakeBindable.new()
+		for i, v in next, params.Values do
+			local newbutton = create("TextButton",{
+				Parent = container,
+				BackgroundColor3 = Color3.fromRGB(50, 50, 50),
+				BorderSizePixel = 0,
+				Size = UDim2.new(1, 0,0, 21),
+				Font = Enum.Font.Gotham,
+				Text = i,
+				TextColor3 = Color3.fromRGB(255, 255, 255),
+				TextSize = 14
+			})
+			newbutton.MouseButton1Click:Connect(function()
+				property.Value,open,label.Text = v,false,i
+				openclose()
+				event:Fire(v)
+			end)
+		end
+		button.MouseButton1Click:Connect(function()
+			open = not open
+			openclose()
+		end)
+		property.Changed = event.Event
+		return new,property
+	end,
 }
 
 
@@ -327,7 +395,7 @@ function additem(_frame,type,params,other)
 	assert(itemtype,"Invalid item type")
 	assert(params.Name and tostring(params.Name),"Name is required")
 	local new,thing = itemtype(params,other)
-	new.Parent,new.LayoutOrder,thing.ParentType = _frame,params.LayoutOrder or 0,other.ParentType
+	new.Parent,new.LayoutOrder,thing.ParentType,thing.Name = _frame,params.LayoutOrder or 0,other.ParentType,params.Name
 	return new,thing
 end
 
@@ -341,7 +409,7 @@ function item:Remove()
 	if categorycontainer then
 		categorycontainer.Size = UDim2.new(1, 0,0, 25+list.List.AbsoluteContentSize.Y)
 	end
-	self = nil
+	self.Parent.Items[self.Name] = nil
 end
 
 function item.new(...)
@@ -365,7 +433,7 @@ function category:AddItem(itemtype,params)
 	local newitem = item.new(self.Frame.Frame.List,itemtype,params,{Color=self.Color,ParentType="Category"})
 	self.Frame.Frame.List.Size = UDim2.new(1, 0,0, self.Frame.Frame.List.List.AbsoluteContentSize.Y)
 	self.Frame.Size = UDim2.new(1, 0,0, 25+self.Frame.Frame.List.Size.Y.Offset)
-	self.Items[params.Name] = newitem
+	self.Items[params.Name],newitem.Parent = newitem,self
 	return newitem
 end
 
@@ -378,7 +446,7 @@ function category:Remove()
 	local list = self.Frame.Parent
 	self.Frame:Destroy()
 	list.Size = UDim2.new(1, 0,0, list.List.AbsoluteContentSize.Y)
-	self = nil
+	self.Parent.Categories[self.Name] = nil
 end
 
 function category.new(name,list,color,sort,layoutorder)
@@ -413,7 +481,7 @@ function category.new(name,list,color,sort,layoutorder)
 		SortOrder = (sort == Enum.SortOrder.LayoutOrder or sort == Enum.SortOrder.Name) and sort or Enum.SortOrder.Name,
 		Name = "List"
 	})
-	return setmetatable({Frame=container,Color=color,Items={}},category)
+	return setmetatable({Frame=container,Color=color,Items={},Name=name},category)
 end
 
 
@@ -429,14 +497,17 @@ function newscript:AddItem(itemtype,params)
 	assert(self.Items[params.Name] == nil,string.format("Item name '%s' is taken",params.Name))
 	local newitem = item.new(self.Frame.InitialList.MainCategory,itemtype,params,{Color=self.Color,ParentType="Script"})
 	self.Frame.InitialList.MainCategory.Size = UDim2.new(1, 0,0, self.Frame.InitialList.MainCategory.List.AbsoluteContentSize.Y)
-	self.Items[params.Name] = newitem
+	self.Items[params.Name],self.newitem = newitem,self
 	return newitem
 end
 
 function newscript:AddCategory(name,sort,layoutorder)
 	assert(self.Categories[name] == nil,string.format("Category name '%s' is taken",name))
 	local newcategory = category.new(name,self.Frame.InitialList,self.Color,sort,layoutorder)
-	self.Categories[name] = newcategory
+	self.Categories[name],newcategory.Parent = newcategory,self
+	for i, v in next, self.Categories do
+		v.Frame.ZIndex += 1
+	end
 	return newcategory
 end
 
@@ -447,7 +518,7 @@ end
 
 function newscript:Remove()
 	self.Container:Destroy()
-	self = nil
+	scripts[self.Name] = nil
 end
 
 function newscript.new(name,color,itemsort,categorysort)
@@ -486,7 +557,7 @@ function newscript.new(name,color,itemsort,categorysort)
 		BackgroundColor3 = Color3.fromRGB(45, 45, 45),
 		BorderSizePixel = 0,
 		Size = UDim2.new(1, 0,0, 0),
-		Name = "MainCategory"
+		Name = "MainCategory",
 	})
 	create("UIListLayout",{
 		Parent = category1,
@@ -496,7 +567,7 @@ function newscript.new(name,color,itemsort,categorysort)
 	if open then
 		tween(label,{Position= UDim2.new()},math.random(40,70)/75,not open and Enum.EasingDirection.In)
 	end
-	return setmetatable({Container=new,Frame=label,Color=color,Categories={},Items={}},newscript)
+	return setmetatable({Container=new,Frame=label,Color=color,Categories={},Items={},Name=name},newscript)
 end
 
 -- panel functions
@@ -508,10 +579,10 @@ function panel:AddScript(name,color,itemsort,categorysort)
 	assert(name and typeof(tostring(name)) == "string","Argument 1 Invalid or nil")
 	assert(scripts[name] == nil,string.format("Script name '%s' is taken",name))
 	color = color or Color3.fromRGB(255, 148, 106)
-	local thenewscript = newscript.new(name,color,itemsort,categorysort)
-	scripts[name] = thenewscript
+	local newscript = newscript.new(name,color,itemsort,categorysort)
+	scripts[name],newscript.Parent = newscript,scripts
 	screencover.CanvasSize = UDim2.new(0, mainlist.AbsoluteContentSize.X,0, 0)
-	return thenewscript
+	return newscript
 end
 
 function panel:GetScript(name)
