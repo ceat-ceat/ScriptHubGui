@@ -6,6 +6,8 @@ read here: https://github.com/ceat-ceat/ScriptPanelv2/wiki/Script-Panel-v2#listd
 - changing the value of an item via script instead of user input now fires the changed event
 	took a shit ton of tinkering so tell me if somethings broken
 
+- fixed an issue with a recursive function that caused it to go on forever
+
 
 7/31/2021
 - added dropdowns
