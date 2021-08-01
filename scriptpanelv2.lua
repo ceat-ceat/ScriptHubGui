@@ -27,8 +27,8 @@ changelog has moved, please go here instead
 
 ]]
 
---loadstring(game:HttpGet("https://raw.githubusercontent.com/ceat-ceat/stuff/main/fake%20bindable.lua"))()
-require(script:WaitForChild("fakebindable"))
+loadstring(game:HttpGet("https://raw.githubusercontent.com/ceat-ceat/stuff/main/fake%20bindable.lua"))()
+--require(script:WaitForChild("fakebindable"))
 local ts,plrs,ts2,uis,coregui,run = game:GetService("TweenService"),game:GetService("Players"),game:GetService("TextService"),game:GetService("UserInputService"),game:GetService("CoreGui"),game:GetService("RunService")
 
 function create(class,prop)
@@ -147,6 +147,7 @@ end)
 
 changekeybind(Enum.KeyCode.BackSlash)
 
+
 -- itemtypes
 
 
@@ -172,6 +173,17 @@ function createbasicframe(text)
 	})
 	return new
 end
+
+
+-- itemtypes that require entire objects
+
+
+local listdropdown = {}
+listdropdown.__index = listdropdown
+
+
+-- item creating
+
 
 local itemtypes = {
 	String = function(params)
@@ -378,6 +390,7 @@ local itemtypes = {
 		property.Changed = event.Event
 		return new,property
 	end,
+	-- listdropdown is in the listdropdown functions section i know it sucks ok just go down ther
 }
 
 
@@ -395,17 +408,28 @@ function additem(_frame,type,params,other)
 	assert(itemtype,"Invalid item type")
 	assert(params.Name and tostring(params.Name),"Name is required")
 	local new,thing = itemtype(params,other)
-	new.Parent,new.LayoutOrder,thing.ParentType,thing.Name = _frame,params.LayoutOrder or 0,other.ParentType,params.Name
+	new.Parent,new.LayoutOrder,thing.ParentType,thing.Name,thing.Color = _frame,params.LayoutOrder or 0,other.ParentType,params.Name,other.Color
 	return new,thing
 end
 
 local item = {}
 item.__index = item
 
+function setitemmetatotable(tabl)
+	local existingmeta = getmetatable(tabl)
+	if existingmeta then setitemmetatotable(existingmeta) return end
+	setmetatable(tabl,item)
+end
+
 function item:Remove()
 	local list,categorycontainer = self.Frame.Parent,self.ParentType == "Category" and self.Frame.Parent.Parent.Parent
 	self.Frame:Destroy()
-	list.Size = UDim2.new(1, 0,0, list.List.AbsoluteContentSize.Y)
+	print(self)
+	if self.Parent.OpenClose then
+		self.Parent.OpenClose()
+	else
+		list.Size = UDim2.new(1, 0,0, list.List.AbsoluteContentSize.Y)
+	end
 	if categorycontainer then
 		categorycontainer.Size = UDim2.new(1, 0,0, 25+list.List.AbsoluteContentSize.Y)
 	end
@@ -415,9 +439,70 @@ end
 function item.new(...)
 	local new,thing = additem(...)
 	thing.Frame = new
-	return setmetatable(thing,item)
+	local highestmetatablelayer,oldhighestmetatablelayer = {},{}
+	setitemmetatotable(thing)
+	setmetatable(oldhighestmetatablelayer,item)
+	return thing
 end
 
+
+-- that part where i make the functions for items that need their own objects
+
+
+function listdropdown:AddItem(itemtype,params)
+	assert(itemtype and tostring(itemtype),"Argument 1 invalid or nil")
+	assert(self.Items[params.Name] == nil,string.format("Item name '%s' is taken",params.Name))
+	local newitem = item.new(self.Frame.List,itemtype,params,{Color=self.Color,ParentType="Item"})
+	self.OpenClose()
+	self.Items[params.Name],newitem.Parent = newitem,self
+	return newitem
+end
+
+function listdropdown:GetItem(name)
+	assert(name and tostring(name),"Argument 1 invalid or nil")
+	return self.Items[name]
+end
+
+function listdropdown.new(params,other)
+	local new,open = createbasicframe(params.Name),false
+	local button,arrow,container = create("TextButton",{
+		Parent = new,
+		BackgroundTransparency = 1,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(0.5, 0,0.5, 0),
+		Size = UDim2.new(1, -10,1, -10),
+		Text = "",
+		ZIndex = 2
+	}),create("ImageLabel",{
+		Parent = new,
+		BackgroundTransparency = 1,
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.new(1, -5,0, 0),
+		Size = UDim2.new(0, 20,1, 0),
+		Image = "rbxassetid://4430382116",
+		ScaleType = Enum.ScaleType.Fit
+	}),create("Frame",{
+		Parent = new,
+		BackgroundColor3 = Color3.fromRGB(35, 35, 35),
+		BorderSizePixel = 0,
+		Position = UDim2.new(0, 0,1, 0),
+		Size = UDim2.new(1, 0,0, 0),
+		ClipsDescendants = true,
+		Name = "List"
+	})
+	local list = create("UIListLayout",{Parent=container,Name="List"})
+	local function openclose()
+		tween(container,{Size=UDim2.new(1, 0,0, open and list.AbsoluteContentSize.Y or 0)},0.3)
+		tween(arrow,{Rotation=open and 180 or 0},0.3)
+	end
+	button.MouseButton1Click:Connect(function()
+		open = not open
+		openclose()
+	end)
+	return new,setmetatable({Frame=container,Color=other.Color,Items={},Name=params.Name,OpenClose=openclose},listdropdown)
+end
+
+itemtypes.ListDropdown = listdropdown.new
 
 
 -- script category functions
