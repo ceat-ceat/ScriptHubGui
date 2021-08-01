@@ -47,6 +47,11 @@ end
 if _G.ScriptPanelv2 then return "Script Panel v2 is already setup; use _G.ScriptPanelv2:AddScript()" end
 
 
+-- reference
+
+
+local reference = {Keys=Enum.KeyCode:GetEnumItems()}
+
 
 -- setup
 
@@ -175,6 +180,38 @@ function createbasicframe(text)
 end
 
 
+-- property
+
+
+require(script:WaitForChild("fakebindable"))
+
+local property = {
+	__index = function(self,index)
+		return index == "Value" and rawget(self,"__value") or index == "__event" and rawget(self,"__event") or index == "Changed" and rawget(self,"Changed") or getmetatable(self)[index]
+	end,
+	__newindex = function(self,index,value)
+		if index == "Value" or index == "Value_silent" then
+			value = rawget(self,"__ValueFilter")(value)
+			local oldvalue = rawget(self,"__value")
+			rawset(self,"__value",value)
+			if index == "Value" and value ~= oldvalue then
+				self.__event:Fire(value)
+			end
+		end
+	end,
+}
+
+function property.new(valuefilter,default)
+	assert(typeof(valuefilter) == "function","Argument 1 missing or nil")
+	local bindable = _G.FakeBindable.new()
+	local prop = setmetatable({Name="to be set",Frame="to be set",Parent="to be set",ParentType="to be set",Color="to be set",__event=bindable,Changed=bindable.Event,__ValueFilter=valuefilter},property)
+	if default then
+		prop.Value_silent = default
+	end
+	return prop
+end
+
+
 -- itemtypes that require entire objects
 
 
@@ -188,7 +225,9 @@ listdropdown.__index = listdropdown
 local itemtypes = {
 	String = function(params)
 		local new,default = createbasicframe(params.Name),typeof(params.Default) == "string" and params.Default or ""
-		local property = {Value=default}
+		local property = property.new(function(value)
+			return typeof(value) == "string" and value or default
+		end,default)
 		local textbox = create("TextBox",{
 			Parent = new,
 			BorderSizePixel = 0,
@@ -203,18 +242,20 @@ local itemtypes = {
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 			PlaceholderText = default
 		})
-		local event = _G.FakeBindable.new()
-		property.Changed = event.Event
 		textbox.FocusLost:Connect(function()
-			property.Value = (textbox.Text ~= "" and textbox.Text or default)
-			textbox.Text = property.Value
-			event:Fire(property.Value)
+			property.Value = textbox.Text
 		end)
+		property.Changed:Connect(function()
+			textbox.Text = property.Value
+		end)
+		property.Value = default
 		return new,property
 	end,
 	Number = function(params)
 		local new,default = createbasicframe(params.Name),tonumber(params.Default) or 0
-		local property = {Value=default}
+		local property = property.new(function(value)
+			return tonumber(value) or default
+		end,default)
 		local textbox = create("TextBox",{
 			Parent = new,
 			BorderSizePixel = 0,
@@ -229,18 +270,19 @@ local itemtypes = {
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 			PlaceholderText = default
 		})
-		local event = _G.FakeBindable.new()
-		property.Changed = event.Event
 		textbox.FocusLost:Connect(function()
-			property.Value = tonumber(textbox.Text) or default
-			textbox.Text = property.Value
-			event:Fire(property.Value)
+			property.Value = textbox.Text
+		end)
+		property.Changed:Connect(function(value)
+			textbox.Text = value
 		end)
 		return new,property
 	end,
 	Boolean = function(params,otherdata)
-		local new,default = createbasicframe(params.Name),((params.Default and typeof(params.Default) == "boolean") and params.Default or false)
-		local property = {Value=default}
+		local new,default = createbasicframe(params.Name),typeof(params.Default) == "boolean" and params.Default or false
+		local property = property.new(function(value)
+			return typeof(value) == "boolean" and value or false
+		end,default)
 		local bar = create("Frame",{
 			Parent = new,
 			BorderSizePixel = 0,
@@ -258,15 +300,14 @@ local itemtypes = {
 			Text = "",
 			ZIndex = 2
 		})
-		local event = _G.FakeBindable.new()
-		property.Changed = event.Event
 		new.Label.TextColor3 = (property.Value and otherdata.Color or Color3.fromRGB(255, 255, 255))
 		button.MouseButton1Click:Connect(function()
 			property.Value = not property.Value
+		end)
+		property.Changed:Connect(function(v)
 			local color = (property.Value and otherdata.Color or Color3.fromRGB(255, 255, 255))
 			tween(bar,{BackgroundColor3 = color},0.3)
 			tween(new.Label,{TextColor3 = color},0.3)
-			event:Fire(property.Value)
 		end)
 		return new,property
 	end,
@@ -291,8 +332,10 @@ local itemtypes = {
 		return new,{Click = event.Event}
 	end,
 	Keybind = function(params)
-		local new,default = createbasicframe(params.Name),typeof(params.Default) == "EnumItem" and params.Default or Enum.KeyCode.E
-		local property,changing = {Value=default},false
+		local new,default = createbasicframe(params.Name),table.find(reference.Keys,params.Default) and params.Default or Enum.KeyCode.E
+		local property,changing = property.new(function(value)
+			return table.find(reference.Keys,value) and value or default
+		end),false
 		local button = create("TextButton",{
 			Parent = new,
 			BorderSizePixel = 0,
@@ -305,18 +348,19 @@ local itemtypes = {
 			TextSize = 14,
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 		})
-		local event = _G.FakeBindable.new()
-		property.Changed = event.Event
 		button.MouseButton1Click:Connect(function()
 			if changing then return end
 			changing,button.Text,button.Size = true,"Press a key",UDim2.new(0, 80,0, 21)
 			local key
 			repeat
 				key = uis.InputBegan:Wait()
-			until key.KeyCode ~= Enum.KeyCode.Unknown
-			button.Text,button.Size = key.KeyCode.Name,UDim2.new(0, math.max(ts2:GetTextSize(key.KeyCode.Name,14,Enum.Font.Gotham,Vector2.new()).X+6,50),0, 21)
-			property.Value = key.KeyCode
-			event:Fire(key.KeyCode)
+			until key.KeyCode ~= Enum.KeyCode.Unknown or not changing
+			if key and key.KeyCode ~= Enum.KeyCode.Unknown then
+				property.Value = key.KeyCode
+			end
+		end)
+		property.Changed:Connect(function(value)
+			button.Text,button.Size = value.Name,UDim2.new(0, math.max(ts2:GetTextSize(value.Name,14,Enum.Font.Gotham,Vector2.new()).X+6,50),0, 21)
 			changing = false
 		end)
 		return new,property
@@ -324,7 +368,9 @@ local itemtypes = {
 	Dropdown = function(params)
 		assert(typeof(params.Values) == "table","Values array invalid or nil")
 		local new,default = createbasicframe(params.Name),params.Values[params.Default]
-		local property,open = {Value=default},false
+		local property,open = property.new(function(value)
+			return params.Values[value] or default
+		end,default),false
 		local button = create("TextButton",{
 			Parent = new,
 			AnchorPoint = Vector2.new(1, 0.5),
@@ -365,7 +411,13 @@ local itemtypes = {
 			tween(container,{Size=UDim2.new(1, 0,0, open and list.AbsoluteContentSize.Y or 0)},0.3)
 			tween(arrow,{Rotation=open and 180 or 0},0.3)
 		end
-		local event = _G.FakeBindable.new()
+		local function findindex(value)
+			for i, v in next, params.Values do
+				if v == value then
+					return i
+				end
+			end
+		end
 		for i, v in next, params.Values do
 			local newbutton = create("TextButton",{
 				Parent = container,
@@ -378,16 +430,18 @@ local itemtypes = {
 				TextSize = 14
 			})
 			newbutton.MouseButton1Click:Connect(function()
-				property.Value,open,label.Text = v,false,i
+				property.Value,open = i,false
 				openclose()
-				event:Fire(v)
 			end)
 		end
 		button.MouseButton1Click:Connect(function()
 			open = not open
 			openclose()
 		end)
-		property.Changed = event.Event
+		property.Changed:Connect(function(value)
+			open,label.Text = false,findindex(value)
+			openclose()
+		end)
 		return new,property
 	end,
 	-- listdropdown is in the listdropdown functions section i know it sucks ok just go down ther
@@ -424,7 +478,6 @@ end
 function item:Remove()
 	local list,categorycontainer = self.Frame.Parent,self.ParentType == "Category" and self.Frame.Parent.Parent.Parent
 	self.Frame:Destroy()
-	print(self)
 	if self.Parent.OpenClose then
 		self.Parent.OpenClose()
 	else
@@ -439,9 +492,9 @@ end
 function item.new(...)
 	local new,thing = additem(...)
 	thing.Frame = new
-	local highestmetatablelayer,oldhighestmetatablelayer = {},{}
+	--local highestmetatablelayer,oldhighestmetatablelayer = {},{}
 	setitemmetatotable(thing)
-	setmetatable(oldhighestmetatablelayer,item)
+	setmetatable({},item)
 	return thing
 end
 
@@ -582,7 +635,7 @@ function newscript:AddItem(itemtype,params)
 	assert(self.Items[params.Name] == nil,string.format("Item name '%s' is taken",params.Name))
 	local newitem = item.new(self.Frame.InitialList.MainCategory,itemtype,params,{Color=self.Color,ParentType="Script"})
 	self.Frame.InitialList.MainCategory.Size = UDim2.new(1, 0,0, self.Frame.InitialList.MainCategory.List.AbsoluteContentSize.Y)
-	self.Items[params.Name],self.newitem = newitem,self
+	self.Items[params.Name],newitem.Parent = newitem,self
 	return newitem
 end
 
