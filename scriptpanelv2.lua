@@ -1,5 +1,4 @@
 --[[
--- CURRENTLY YOU CAN CAUSE A STACK OVERFLOW WHY ADDING ITEMS TO LISTDROPDOWNS IDK WHAT HAPPENED WITH MY RECURSIVE FUNCTION I DONT HAVE TIME RN I USED UP MY ENTIRE MORNING :soobing:
 
 ceat_ceat
 ceat(mega stupid)jjjjjjjjj#6144
@@ -472,7 +471,7 @@ item.__index = item
 
 function setitemmetatotable(tabl)
 	local existingmeta = getmetatable(tabl)
-	if existingmeta then setitemmetatotable(existingmeta) return end
+	if existingmeta and existingmeta ~= item then setitemmetatotable(existingmeta) return end
 	setmetatable(tabl,item)
 end
 
@@ -493,9 +492,7 @@ end
 function item.new(...)
 	local new,thing = additem(...)
 	thing.Frame = new
-	--local highestmetatablelayer,oldhighestmetatablelayer = {},{}
 	setitemmetatotable(thing)
-	setmetatable({},item)
 	return thing
 end
 
