@@ -183,8 +183,6 @@ end
 -- property
 
 
-require(script:WaitForChild("fakebindable"))
-
 local property = {
 	__index = function(self,index)
 		return index == "Value" and rawget(self,"__value") or index == "__event" and rawget(self,"__event") or index == "Changed" and rawget(self,"Changed") or getmetatable(self)[index]
