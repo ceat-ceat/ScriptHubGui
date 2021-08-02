@@ -15,7 +15,7 @@ it just allows me to add more features to it easier and it has a bit more custom
 
 run
 
-	loadstring("https://raw.githubusercontent.com/ceat-ceat/ScriptPanelv2/main/scriptpanelv2.lua")()
+	loadstring("https://raw.githubusercontent.com/ceat-ceat/stuff/main/scriptpanelv2.lua")()
 	
 to get _G.ScriptPanelv2 up and working
 
@@ -27,7 +27,7 @@ changelog has moved, please go here instead
 
 ]]
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/ceat-ceat/ScriptPanelv2/main/fake%20bindable.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/ceat-ceat/stuff/main/fake%20bindable.lua"))()
 --require(script:WaitForChild("fakebindable"))
 local ts,plrs,ts2,uis,coregui,run = game:GetService("TweenService"),game:GetService("Players"),game:GetService("TextService"),game:GetService("UserInputService"),game:GetService("CoreGui"),game:GetService("RunService")
 
@@ -165,9 +165,8 @@ function createbasicframe(text)
 	})
 	create("TextLabel",{
 		Parent = new,
-		AnchorPoint = Vector2.new(0, 0.5),
-		Position = UDim2.new(0, 10,0.5, 0),
-		Size = UDim2.new(1, -10,1, 0),
+		Position = UDim2.new(0, 10,0, 5),
+		Size = UDim2.new(1, -10,0, 20),
 		Font = Enum.Font.Gotham,
 		BackgroundTransparency = 1,
 		Text = text,
@@ -382,7 +381,7 @@ local itemtypes = {
 			Parent = button,
 			BackgroundTransparency = 1,
 			Position = UDim2.new(0, 7,0, 0),
-			Size = UDim2.new(0, 43,1, 0),
+			Size = UDim2.new(0, 43,0, 30),
 			Font = Enum.Font.Gotham,
 			Text = default and params.Default or "",
 			TextColor3 = Color3.fromRGB(255, 255, 255),
@@ -478,8 +477,6 @@ function item:Remove()
 	self.Frame:Destroy()
 	if self.Parent.OpenClose then
 		self.Parent.OpenClose()
-	else
-		list.Size = UDim2.new(1, 0,0, list.List.AbsoluteContentSize.Y)
 	end
 	if categorycontainer then
 		categorycontainer.Size = UDim2.new(1, 0,0, 25+list.List.AbsoluteContentSize.Y)
@@ -502,6 +499,7 @@ function listdropdown:AddItem(itemtype,params)
 	assert(itemtype and tostring(itemtype),"Argument 1 invalid or nil")
 	assert(self.Items[params.Name] == nil,string.format("Item name '%s' is taken",params.Name))
 	local newitem = item.new(self.Frame.List,itemtype,params,{Color=self.Color,ParentType="Item"})
+	self.Frame.List.Size = UDim2.new(1, 0,0, self.Frame.List.List.AbsoluteContentSize.Y)
 	self.OpenClose()
 	self.Items[params.Name],newitem.Parent = newitem,self
 	return newitem
@@ -527,28 +525,29 @@ function listdropdown.new(params,other)
 		BackgroundTransparency = 1,
 		AnchorPoint = Vector2.new(1, 0),
 		Position = UDim2.new(1, -5,0, 0),
-		Size = UDim2.new(0, 20,1, 0),
+		Size = UDim2.new(0, 20,0, 30),
 		Image = "rbxassetid://4430382116",
 		ScaleType = Enum.ScaleType.Fit
 	}),create("Frame",{
 		Parent = new,
 		BackgroundColor3 = Color3.fromRGB(35, 35, 35),
 		BorderSizePixel = 0,
-		Position = UDim2.new(0, 0,1, 0),
+		Position = UDim2.new(0, 0,0, 30),
 		Size = UDim2.new(1, 0,0, 0),
 		ClipsDescendants = true,
 		Name = "List"
 	})
 	local list = create("UIListLayout",{Parent=container,Name="List"})
+	new.ClipsDescendants = true
 	local function openclose()
-		tween(container,{Size=UDim2.new(1, 0,0, open and list.AbsoluteContentSize.Y or 0)},0.3)
+		tween(new,{Size=UDim2.new(1, 0,0, (open and list.AbsoluteContentSize.Y or 0) + 30)},0.3)
 		tween(arrow,{Rotation=open and 180 or 0},0.3)
 	end
 	button.MouseButton1Click:Connect(function()
 		open = not open
 		openclose()
 	end)
-	return new,setmetatable({Frame=container,Color=other.Color,Items={},Name=params.Name,OpenClose=openclose},listdropdown)
+	return new,setmetatable({Frame=new,Color=other.Color,Items={},Name=params.Name,OpenClose=openclose},listdropdown)
 end
 
 itemtypes.ListDropdown = listdropdown.new
@@ -610,11 +609,14 @@ function category.new(name,list,color,sort,layoutorder)
 		Position = UDim2.new(0, 0,1, 0),
 		Name = "List"
 	})
-	create("UIListLayout",{
+	local uilist = create("UIListLayout",{
 		Parent = listframe,
 		SortOrder = (sort == Enum.SortOrder.LayoutOrder or sort == Enum.SortOrder.Name) and sort or Enum.SortOrder.Name,
 		Name = "List"
 	})
+	uilist:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		listframe.Size = UDim2.new(1, 0,0, uilist.AbsoluteContentSize.Y)
+	end)
 	return setmetatable({Frame=container,Color=color,Items={},Name=name},category)
 end
 
@@ -693,11 +695,14 @@ function newscript.new(name,color,itemsort,categorysort)
 		Size = UDim2.new(1, 0,0, 0),
 		Name = "MainCategory",
 	})
-	create("UIListLayout",{
+	local list = create("UIListLayout",{
 		Parent = category1,
 		SortOrder = (itemsort == Enum.SortOrder.LayoutOrder or itemsort == Enum.SortOrder.Name) and itemsort or Enum.SortOrder.Name,
 		Name = "List"
 	})
+	list:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		category1.Size = UDim2.new(1, 0,0, list.AbsoluteContentSize.Y)
+	end)
 	if open then
 		tween(label,{Position= UDim2.new()},math.random(40,70)/75,not open and Enum.EasingDirection.In)
 	end
