@@ -473,13 +473,10 @@ function setitemmetatotable(tabl)
 end
 
 function item:Remove()
-	local list,categorycontainer = self.Frame.Parent,self.ParentType == "Category" and self.Frame.Parent.Parent.Parent
+	local list = self.Frame.Parent
 	self.Frame:Destroy()
 	if self.Parent.OpenClose then
 		self.Parent.OpenClose()
-	end
-	if categorycontainer then
-		categorycontainer.Size = UDim2.new(1, 0,0, 25+list.List.AbsoluteContentSize.Y)
 	end
 	self.Parent.Items[self.Name] = nil
 end
@@ -499,7 +496,6 @@ function listdropdown:AddItem(itemtype,params)
 	assert(itemtype and tostring(itemtype),"Argument 1 invalid or nil")
 	assert(self.Items[params.Name] == nil,string.format("Item name '%s' is taken",params.Name))
 	local newitem = item.new(self.Frame.List,itemtype,params,{Color=self.Color,ParentType="Item"})
-	self.Frame.List.Size = UDim2.new(1, 0,0, self.Frame.List.List.AbsoluteContentSize.Y)
 	self.OpenClose()
 	self.Items[params.Name],newitem.Parent = newitem,self
 	return newitem
@@ -515,9 +511,8 @@ function listdropdown.new(params,other)
 	local button,arrow,container = create("TextButton",{
 		Parent = new,
 		BackgroundTransparency = 1,
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.new(0.5, 0,0.5, 0),
-		Size = UDim2.new(1, -10,1, -10),
+		Position = UDim2.new(0, 5,0, 5),
+		Size = UDim2.new(1, -10,0, 20),
 		Text = "",
 		ZIndex = 2
 	}),create("ImageLabel",{
@@ -533,7 +528,7 @@ function listdropdown.new(params,other)
 		BackgroundColor3 = Color3.fromRGB(35, 35, 35),
 		BorderSizePixel = 0,
 		Position = UDim2.new(0, 0,0, 30),
-		Size = UDim2.new(1, 0,0, 0),
+		Size = UDim2.new(1, 0,1, -30),
 		ClipsDescendants = true,
 		Name = "List"
 	})
@@ -564,7 +559,6 @@ function category:AddItem(itemtype,params)
 	assert(itemtype and tostring(itemtype),"Argument 1 invalid or nil")
 	assert(self.Items[params.Name] == nil,string.format("Item name '%s' is taken",params.Name))
 	local newitem = item.new(self.Frame.Frame.List,itemtype,params,{Color=self.Color,ParentType="Category"})
-	self.Frame.Frame.List.Size = UDim2.new(1, 0,0, self.Frame.Frame.List.List.AbsoluteContentSize.Y)
 	self.Frame.Size = UDim2.new(1, 0,0, 25+self.Frame.Frame.List.Size.Y.Offset)
 	self.Items[params.Name],newitem.Parent = newitem,self
 	return newitem
@@ -576,9 +570,7 @@ function category:GetItem(name)
 end
 
 function category:Remove()
-	local list = self.Frame.Parent
 	self.Frame:Destroy()
-	list.Size = UDim2.new(1, 0,0, list.List.AbsoluteContentSize.Y)
 	self.Parent.Categories[self.Name] = nil
 end
 
@@ -615,7 +607,7 @@ function category.new(name,list,color,sort,layoutorder)
 		Name = "List"
 	})
 	uilist:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-		listframe.Size = UDim2.new(1, 0,0, uilist.AbsoluteContentSize.Y)
+		listframe.Size,container.Size = UDim2.new(1, 0,0, uilist.AbsoluteContentSize.Y),UDim2.new(1, 0,0, uilist.AbsoluteContentSize.Y + 25)
 	end)
 	return setmetatable({Frame=container,Color=color,Items={},Name=name},category)
 end
@@ -632,7 +624,6 @@ function newscript:AddItem(itemtype,params)
 	assert(itemtype and tostring(itemtype),"Argument 1 invalid or nil")
 	assert(self.Items[params.Name] == nil,string.format("Item name '%s' is taken",params.Name))
 	local newitem = item.new(self.Frame.InitialList.MainCategory,itemtype,params,{Color=self.Color,ParentType="Script"})
-	self.Frame.InitialList.MainCategory.Size = UDim2.new(1, 0,0, self.Frame.InitialList.MainCategory.List.AbsoluteContentSize.Y)
 	self.Items[params.Name],newitem.Parent = newitem,self
 	return newitem
 end
