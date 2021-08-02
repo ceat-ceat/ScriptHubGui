@@ -27,7 +27,7 @@ changelog has moved, please go here instead
 
 ]]
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/ceat-ceat/stuff/main/fake%20bindable.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/ceat-ceat/ScriptPanelv2/main/fake%20bindable.lua"))()
 --require(script:WaitForChild("fakebindable"))
 local ts,plrs,ts2,uis,coregui,run = game:GetService("TweenService"),game:GetService("Players"),game:GetService("TextService"),game:GetService("UserInputService"),game:GetService("CoreGui"),game:GetService("RunService")
 
