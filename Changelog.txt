@@ -1,5 +1,9 @@
 Changelog
 
+8/2/2021
+- removed an old require for an old fakebindable and it would never get past it jjbhugsdvhsdfvj
+
+
 8/1/2021
 - added list dropdowns (might be buggy)
 read here: https://github.com/ceat-ceat/ScriptPanelv2/wiki/Script-Panel-v2#listdropdown
