@@ -6,7 +6,7 @@ if _G.FakeBindable then return end
 
 
 local fakeconnection = {
-	__tostring = function(self)
+	__tostring = function()
 		return "FakeConnection"
 	end
 }
@@ -27,7 +27,7 @@ fakeconnection.disconnect = fakeconnection.Disconnect
 
 
 local fakeevent = {
-	__tostring = function(self)
+	__tostring = function()
 		return "FakeEvent"
 	end
 }
@@ -50,7 +50,7 @@ end
 
 
 local fakebindable = {
-	__tostring = function(self)
+	__tostring = function()
 		return "FakeBindableEvent"
 	end
 }
