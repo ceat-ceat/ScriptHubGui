@@ -5,7 +5,11 @@ if _G.FakeBindable then return end
 -- fake connection
 
 
-local fakeconnection = {}
+local fakeconnection = {
+	__tostring = function(self)
+		return "FakeConnection"
+	end
+}
 fakeconnection.__index = fakeconnection
 
 function fakeconnection:Disconnect()
@@ -22,7 +26,11 @@ fakeconnection.disconnect = fakeconnection.Disconnect
 -- fake event
 
 
-local fakeevent = {}
+local fakeevent = {
+	__tostring = function(self)
+		return "FakeEvent"
+	end
+}
 fakeevent.__index = fakeevent
 
 function fakeevent:Wait()
@@ -41,7 +49,11 @@ end
 -- fake bindable
 
 
-local fakebindable = {}
+local fakebindable = {
+	__tostring = function(self)
+		return "FakeBindableEvent"
+	end
+}
 fakebindable.__index = fakebindable
 
 function fakebindable:Fire(...)
