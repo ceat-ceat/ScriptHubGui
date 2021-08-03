@@ -1,5 +1,10 @@
 Changelog
 
+8/3/2021
+- changed how listdropdowns change in size when something is added or removed
+- made it so that printing objects made from the gui lib will print something along the lines of spv2[object type]_[object name] [value]
+
+
 8/2/2021
 - removed an old require for an old fakebindable and it would never get past it jjbhugsdvhsdfvj
 
