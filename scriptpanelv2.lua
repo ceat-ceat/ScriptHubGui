@@ -196,6 +196,9 @@ local property = {
 			end
 		end
 	end,
+	__tostring = function(self)
+		return string.format("spv2Item_%s %s",rawget(self,"Name"),tostring(rawget(self,"__value")))
+	end,
 }
 
 function property.new(valuefilter,default)
@@ -212,7 +215,11 @@ end
 -- itemtypes that require entire objects
 
 
-local listdropdown = {}
+local listdropdown = {
+	__tostring = function(self)
+		return string.format("spv2Item_%s",self.Name)
+	end,
+}
 listdropdown.__index = listdropdown
 
 
@@ -381,7 +388,7 @@ local itemtypes = {
 			Parent = button,
 			BackgroundTransparency = 1,
 			Position = UDim2.new(0, 7,0, 0),
-			Size = UDim2.new(0, 43,0, 30),
+			Size = UDim2.new(0, 43,0, 21),
 			Font = Enum.Font.Gotham,
 			Text = default and params.Default or "",
 			TextColor3 = Color3.fromRGB(255, 255, 255),
@@ -459,7 +466,7 @@ function additem(_frame,type,params,other)
 	assert(itemtype,"Invalid item type")
 	assert(params.Name and tostring(params.Name),"Name is required")
 	local new,thing = itemtype(params,other)
-	new.Parent,new.LayoutOrder,thing.ParentType,thing.Name,thing.Color = _frame,params.LayoutOrder or 0,other.ParentType,params.Name,other.Color
+	new.Parent,new.LayoutOrder,thing.ParentType,thing.Name,thing.Color = _frame,params.LayoutOrder or 0,other.ParentType,string.format("%s_%s",type,params.Name),other.Color
 	return new,thing
 end
 
@@ -475,9 +482,6 @@ end
 function item:Remove()
 	local list = self.Frame.Parent
 	self.Frame:Destroy()
-	if self.Parent.OpenClose then
-		self.Parent.OpenClose()
-	end
 	self.Parent.Items[self.Name] = nil
 end
 
@@ -496,7 +500,6 @@ function listdropdown:AddItem(itemtype,params)
 	assert(itemtype and tostring(itemtype),"Argument 1 invalid or nil")
 	assert(self.Items[params.Name] == nil,string.format("Item name '%s' is taken",params.Name))
 	local newitem = item.new(self.Frame.List,itemtype,params,{Color=self.Color,ParentType="Item"})
-	self.OpenClose()
 	self.Items[params.Name],newitem.Parent = newitem,self
 	return newitem
 end
@@ -538,11 +541,12 @@ function listdropdown.new(params,other)
 		tween(new,{Size=UDim2.new(1, 0,0, (open and list.AbsoluteContentSize.Y or 0) + 30)},0.3)
 		tween(arrow,{Rotation=open and 180 or 0},0.3)
 	end
+	list:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(openclose)
 	button.MouseButton1Click:Connect(function()
 		open = not open
 		openclose()
 	end)
-	return new,setmetatable({Frame=new,Color=other.Color,Items={},Name=params.Name,OpenClose=openclose},listdropdown)
+	return new,setmetatable({Frame=new,Color=other.Color,Items={},Name="to be set"},listdropdown)
 end
 
 itemtypes.ListDropdown = listdropdown.new
@@ -552,7 +556,11 @@ itemtypes.ListDropdown = listdropdown.new
 
 
 
-local category = {}
+local category = {
+	__tostring = function(self)
+		return string.format("spv2Category_%s",self.Name)
+	end,
+}
 category.__index = category
 
 function category:AddItem(itemtype,params)
@@ -617,7 +625,11 @@ end
 
 
 
-local newscript = {}
+local newscript = {
+	__tostring = function(self)
+		return string.format("spv2Script_%s",self.Name)
+	end,
+}
 newscript.__index = newscript
 
 function newscript:AddItem(itemtype,params)
