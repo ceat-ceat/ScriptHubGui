@@ -5,6 +5,8 @@ Changelog
 - fixed my grammar
 thanks red lol
 
+- changed "useloadstring" to "isexploit" because it also determines where the screnengui should be placed now
+
 
 8/3/2021
 - changed how listdropdowns change in size when something is added or removed
