@@ -1,4 +1,4 @@
-local isexploit = true -- true if using an exploit, false if using on legit roblox
+local isexploit = false -- true if using an exploit, false if using on legit roblox
 
 --[[
 ceat_ceat
@@ -561,6 +561,7 @@ itemtypes.ListDropdown = listdropdown.new
 
 
 local category = {
+	__metatable = "The metatable is locked",
 	__tostring = function(self)
 		return string.format("spv2Category_%s",self.Name)
 	end,
@@ -630,6 +631,7 @@ end
 
 
 local newscript = {
+	__metatable = "The metatable is locked",
 	__tostring = function(self)
 		return string.format("spv2Script_%s",self.Name)
 	end,
@@ -718,7 +720,9 @@ end
 
 -- panel functions
 
-local panel = {}
+local panel = {
+	__metatable = "The metatable is locked"
+}
 panel.__index = panel
 
 function panel:AddScript(name,color,itemsort,categorysort)
