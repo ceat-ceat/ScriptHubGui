@@ -1,5 +1,12 @@
 Changelog
 
+8/7/2021
+- locked the metables of most objects, exceptions are belo
+	- Items
+	- Properties
+- because some functions need to be able to use getmetatable()
+
+
 8/4/2021
 - added "useloadstring" config option at the top of the script
 - fixed my grammar
