@@ -1,4 +1,4 @@
-local isexploit = false -- true if using an exploit, false if using on legit roblox
+local isexploit = true -- true if using an exploit, false if using on legit roblox
 
 --[[
 ceat_ceat
