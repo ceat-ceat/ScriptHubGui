@@ -1,4 +1,5 @@
 useloadstring = useloadstring or true -- true if using an exploit, false if using on legit roblox
+-- did the raw not update
 
 --[[
 ceat_ceat
