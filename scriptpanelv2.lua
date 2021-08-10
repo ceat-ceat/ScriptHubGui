@@ -1,5 +1,4 @@
-useloadstring = useloadstring or true -- true if using an exploit, false if using on legit roblox
--- did the raw not update
+useloadstring = useloadstring or false -- true if using an exploit, false if using on legit roblox
 
 --[[
 ceat_ceat
@@ -32,9 +31,10 @@ changelog has moved, please go here instead
 
 ]]
 
+local ts,plrs,ts2,uis,coregui,run = game:GetService("TweenService"),game:GetService("Players"),game:GetService("TextService"),game:GetService("UserInputService"),game:GetService("CoreGui"),game:GetService("RunService")
+assert(run:IsClient(),"Please run this in a local environment!")
 local func = (useloadstring and loadstring or require)(useloadstring and game:HttpGet("https://raw.githubusercontent.com/ceat-ceat/stuff/main/fake%20bindable.lua") or script:WaitForChild("fakebindable"))
 if typeof(func) == "function" then func() end
-local ts,plrs,ts2,uis,coregui,run = game:GetService("TweenService"),game:GetService("Players"),game:GetService("TextService"),game:GetService("UserInputService"),game:GetService("CoreGui"),game:GetService("RunService")
 
 function create(class,prop)
 	local inst = Instance.new(class)
