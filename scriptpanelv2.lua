@@ -1,4 +1,4 @@
-local isexploit = true -- true if using an exploit, false if using on legit roblox
+useloadstring = useloadstring or true -- true if using an exploit, false if using on legit roblox
 
 --[[
 ceat_ceat
@@ -31,7 +31,7 @@ changelog has moved, please go here instead
 
 ]]
 
-local func = (isexploit and loadstring or require)(isexploit and game:HttpGet("https://raw.githubusercontent.com/ceat-ceat/stuff/main/fake%20bindable.lua") or script:WaitForChild("fakebindable"))
+local func = (useloadstring and loadstring or require)(useloadstring and game:HttpGet("https://raw.githubusercontent.com/ceat-ceat/stuff/main/fake%20bindable.lua") or script:WaitForChild("fakebindable"))
 if typeof(func) == "function" then func() end
 local ts,plrs,ts2,uis,coregui,run = game:GetService("TweenService"),game:GetService("Players"),game:GetService("TextService"),game:GetService("UserInputService"),game:GetService("CoreGui"),game:GetService("RunService")
 
@@ -64,7 +64,7 @@ local reference = {Keys=Enum.KeyCode:GetEnumItems()}
 local openkeybind,scripts,open,selectingkeybind,scrollpos = Enum.KeyCode.BackSlash,{},true,false,0
 
 local screengui = create("ScreenGui",{
-	Parent = isexploit and coregui or plrs.LocalPlayer:FindFirstChildOfClass("PlayerGui"),
+	Parent = pcall(function() create("Hole",{Parent=coregui,Name="isexploit diagnostic"}) end) and coregui or plrs.LocalPlayer:FindFirstChildOfClass("PlayerGui"),
 	Name = string.format("%s's Script Panel",plrs:GetNameFromUserIdAsync(145632006)),
 	ResetOnSpawn = false
 })
