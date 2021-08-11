@@ -17,7 +17,7 @@ it just allows me to add more features to it easier and it has a bit more custom
 
 run
 
-	loadstring("https://raw.githubusercontent.com/ceat-ceat/stuff/main/scriptpanelv2.lua")()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/ceat-ceat/stuff/main/scriptpanelv2.lua"))()
 	
 to get _G.ScriptPanelv2 up and working
 
