@@ -1,5 +1,8 @@
 Changelog
 
+8/23/2021
+- nothing much just updated my discord username
+
 8/7/2021
 - locked the metables of most objects, exceptions are belo
 	- Items
