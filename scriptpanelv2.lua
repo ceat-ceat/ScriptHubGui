@@ -1,6 +1,6 @@
 --[[
 ceat_ceat
-ceat(mega stupid)jjjjjjjjj#6144
+ceat#6144
 
 old script panel here:
 - https://pastebin.com/BrRrbL5z
