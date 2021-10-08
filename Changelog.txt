@@ -1,5 +1,9 @@
 Changelog
 
+10/7/2021
+- moved fake bindable to another repository (updated link in script too)
+
+
 8/23/2021
 - nothing much just updated my discord username
 
