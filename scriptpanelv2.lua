@@ -32,7 +32,7 @@ changelog has moved, please go here instead
 local ts,plrs,ts2,uis,coregui,run = game:GetService("TweenService"),game:GetService("Players"),game:GetService("TextService"),game:GetService("UserInputService"),game:GetService("CoreGui"),game:GetService("RunService")
 assert(run:IsClient(),"Please run this in a local environment!")
 --require(script:WaitForChild("fakebindable"))
-loadstring(game:HttpGet("https://raw.githubusercontent.com/ceat-ceat/stuff/main/fake%20bindable.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/ceat-ceat/roblox-script-utils/main/fakebindable.lua"))()
 function create(class,prop)
 	local inst = Instance.new(class)
 	if prop then
