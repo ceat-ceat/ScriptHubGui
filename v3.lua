@@ -1005,6 +1005,7 @@ scriptgui.ReadableProperties = {
 	"ClassName",
 	"SortOrder",
 	"LayoutOrder",
+	"MainCategory",
 	"Categories"
 }
 
