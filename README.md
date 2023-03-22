@@ -44,3 +44,6 @@ enabledelement.ValueChanged:Connect(function(newenabled)
     enabled = newenabled
 end)
 ```
+
+
+Documentation for user Elements can be found [here](https://github.com/ceat-ceat/ScriptHubGui/wiki/ScriptHubGui-(v3))
