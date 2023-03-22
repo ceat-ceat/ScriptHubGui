@@ -46,4 +46,4 @@ end)
 ```
 
 
-Documentation for user Elements can be found [here](https://github.com/ceat-ceat/ScriptHubGui/wiki/ScriptHubGui-(v3))
+Documentation for other Elements can be found [here](https://github.com/ceat-ceat/ScriptHubGui/wiki/ScriptHubGui-(v3))
