@@ -3,6 +3,8 @@ ScriptHubGui, previously ScriptPanelv2, for Roblox exploit scripts
 
 The documentation for ScriptPanelv2 (the old ScriptHubGui) can be found [here](https://github.com/ceat-ceat/ScriptHubGui/wiki/Script-Panel-v2)
 
+This is an old project and as such, code quality is pretty poor. Use if you want.
+
 ScriptHubGui
 ---
 To use, first load v3 using loadstring
